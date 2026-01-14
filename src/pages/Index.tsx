@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -69,6 +69,10 @@ const Index = () => {
 
   const [selectedProjectId, setSelectedProjectId] = useState('default');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : true;
+  });
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
@@ -112,6 +116,20 @@ const Index = () => {
   });
 
   const selectedProject = projects.find(p => p.id === selectedProjectId);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+  }, [isDarkMode]);
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+    toast.success(isDarkMode ? 'Светлая тема включена' : 'Тёмная тема включена');
+  };
 
   const handleCreateTask = () => {
     if (!newTask.title.trim()) {
@@ -400,6 +418,14 @@ const Index = () => {
               <p className="text-sm text-muted-foreground">Управляй проектами и достигай целей</p>
             </div>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleTheme}
+                className="gap-2"
+              >
+                <Icon name={isDarkMode ? 'Sun' : 'Moon'} size={16} />
+              </Button>
               <Dialog open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">
