@@ -31,18 +31,30 @@ export const api = {
   },
 
   async login(email: string, password: string): Promise<AuthResponse> {
-    const response = await fetch(API_URLS.auth, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'login', email, password }),
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Login failed');
+    try {
+      console.log('[API] Login attempt:', { email, url: API_URLS.auth });
+      
+      const response = await fetch(API_URLS.auth, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'login', email, password }),
+      });
+      
+      console.log('[API] Login response:', { status: response.status, ok: response.ok });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('[API] Login error:', error);
+        throw new Error(error.error || 'Login failed');
+      }
+      
+      const data = await response.json();
+      console.log('[API] Login success:', { user: data.user });
+      return data;
+    } catch (error) {
+      console.error('[API] Fetch error:', error);
+      throw error;
     }
-    
-    return response.json();
   },
 
   async verify(token: string): Promise<{ user: User }> {
