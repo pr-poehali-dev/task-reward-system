@@ -10,6 +10,8 @@ from psycopg2.extras import RealDictCursor
 def handler(event: dict, context) -> dict:
     '''API для регистрации и авторизации пользователей'''
     
+    print(f"[AUTH] Incoming request: method={event.get('httpMethod')}, headers={event.get('headers')}")
+    
     method = event.get('httpMethod', 'GET')
     
     if method == 'OPTIONS':
@@ -36,6 +38,7 @@ def handler(event: dict, context) -> dict:
         if method == 'POST':
             body = json.loads(event.get('body', '{}'))
             action = body.get('action')
+            print(f"[AUTH] POST request: action={action}, body_keys={list(body.keys())}")
             
             if action == 'register':
                 return handle_register(cursor, conn, body)
