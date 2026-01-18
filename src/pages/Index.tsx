@@ -69,18 +69,36 @@ const ICONS_LIST = ['Star', 'Heart', 'Zap', 'Trophy', 'Target', 'Award', 'Flag',
 const COLORS_LIST = ['bg-blue-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500', 'bg-yellow-500', 'bg-indigo-500', 'bg-teal-500', 'bg-cyan-500'];
 
 const Index = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 'work', name: 'Работа', icon: 'Briefcase', color: 'bg-blue-500' },
-    { id: 'personal', name: 'Личное', icon: 'User', color: 'bg-green-500' },
-    { id: 'health', name: 'Здоровье', icon: 'Heart', color: 'bg-red-500' },
-    { id: 'learning', name: 'Обучение', icon: 'BookOpen', color: 'bg-purple-500' },
-    { id: 'home', name: 'Дом', icon: 'Home', color: 'bg-orange-500' },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    const saved = localStorage.getItem('tasks');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return parsed.map((t: any) => ({
+        ...t,
+        createdAt: new Date(t.createdAt),
+        scheduledDate: t.scheduledDate ? new Date(t.scheduledDate) : undefined,
+      }));
+    }
+    return [];
+  });
+  
+  const [categories, setCategories] = useState<Category[]>(() => {
+    const saved = localStorage.getItem('categories');
+    return saved ? JSON.parse(saved) : [
+      { id: 'work', name: 'Работа', icon: 'Briefcase', color: 'bg-blue-500' },
+      { id: 'personal', name: 'Личное', icon: 'User', color: 'bg-green-500' },
+      { id: 'health', name: 'Здоровье', icon: 'Heart', color: 'bg-red-500' },
+      { id: 'learning', name: 'Обучение', icon: 'BookOpen', color: 'bg-purple-500' },
+      { id: 'home', name: 'Дом', icon: 'Home', color: 'bg-orange-500' },
+    ];
+  });
 
-  const [projects, setProjects] = useState<Project[]>([
-    { id: 'default', name: 'Главный проект', icon: 'Folder', color: 'bg-blue-500', subProjects: [] },
-  ]);
+  const [projects, setProjects] = useState<Project[]>(() => {
+    const saved = localStorage.getItem('projects');
+    return saved ? JSON.parse(saved) : [
+      { id: 'default', name: 'Главный проект', icon: 'Folder', color: 'bg-blue-500', subProjects: [] },
+    ];
+  });
 
   const [selectedProjectId, setSelectedProjectId] = useState('default');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -91,11 +109,26 @@ const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarView, setSidebarView] = useState<SidebarView>('projects');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
-  const [earnedRewards, setEarnedRewards] = useState<EarnedRewards>({
-    points: 0,
-    minutes: 0,
-    rubles: 0,
+  
+  const [activityLog, setActivityLog] = useState<ActivityLog[]>(() => {
+    const saved = localStorage.getItem('activityLog');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return parsed.map((log: any) => ({
+        ...log,
+        timestamp: new Date(log.timestamp),
+      }));
+    }
+    return [];
+  });
+  
+  const [earnedRewards, setEarnedRewards] = useState<EarnedRewards>(() => {
+    const saved = localStorage.getItem('earnedRewards');
+    return saved ? JSON.parse(saved) : {
+      points: 0,
+      minutes: 0,
+      rubles: 0,
+    };
   });
 
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
@@ -150,6 +183,26 @@ const Index = () => {
     }
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
   }, [isDarkMode]);
+
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
+  useEffect(() => {
+    localStorage.setItem('categories', JSON.stringify(categories));
+  }, [categories]);
+
+  useEffect(() => {
+    localStorage.setItem('projects', JSON.stringify(projects));
+  }, [projects]);
+
+  useEffect(() => {
+    localStorage.setItem('activityLog', JSON.stringify(activityLog));
+  }, [activityLog]);
+
+  useEffect(() => {
+    localStorage.setItem('earnedRewards', JSON.stringify(earnedRewards));
+  }, [earnedRewards]);
 
   const addActivityLog = (action: string, description: string) => {
     const log: ActivityLog = {
