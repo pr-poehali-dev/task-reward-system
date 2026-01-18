@@ -17,9 +17,12 @@ const IndexWithAuth = () => {
       }
 
       try {
+        console.log('[IndexWithAuth] Verifying token...');
         const data = await api.verify(token);
+        console.log('[IndexWithAuth] Token verified:', data.user);
         setUser(data.user);
       } catch (error) {
+        console.error('[IndexWithAuth] Token verification failed:', error);
         localStorage.removeItem('authToken');
         setToken(null);
         toast.error('Сессия истекла. Войдите снова');
@@ -29,7 +32,7 @@ const IndexWithAuth = () => {
     };
 
     verifyToken();
-  }, [token]);
+  }, []);
 
   const handleAuthSuccess = (data: AuthResponse) => {
     setUser(data.user);
