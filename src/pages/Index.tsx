@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { format, isSameDay } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { api, type User } from '@/lib/api';
 
 type RewardType = 'points' | 'minutes' | 'rubles';
 type ViewMode = 'list' | 'board';
@@ -68,7 +69,13 @@ interface EarnedRewards {
 const ICONS_LIST = ['Star', 'Heart', 'Zap', 'Trophy', 'Target', 'Award', 'Flag', 'Rocket', 'Crown', 'Gift', 'Sparkles', 'Coffee', 'BookOpen', 'Code', 'Music', 'Camera', 'Palette', 'Briefcase', 'Home', 'User', 'Folder', 'FolderOpen', 'Package'];
 const COLORS_LIST = ['bg-blue-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500', 'bg-yellow-500', 'bg-indigo-500', 'bg-teal-500', 'bg-cyan-500'];
 
-const Index = () => {
+interface IndexProps {
+  user: User;
+  token: string;
+  onLogout: () => void;
+}
+
+const Index = ({ user, token, onLogout }: IndexProps) => {
   const [tasks, setTasks] = useState<Task[]>(() => {
     const saved = localStorage.getItem('tasks');
     if (saved) {
@@ -203,6 +210,66 @@ const Index = () => {
   useEffect(() => {
     localStorage.setItem('earnedRewards', JSON.stringify(earnedRewards));
   }, [earnedRewards]);
+
+  const syncToCloud = useCallback(async () => {
+    try {
+      await api.syncData(token, {
+        categories,
+        projects,
+        tasks: tasks.map(t => ({
+          ...t,
+          createdAt: t.createdAt.toISOString(),
+          scheduledDate: t.scheduledDate?.toISOString(),
+        })),
+        rewards: earnedRewards,
+        activityLogs: activityLog.map(log => ({
+          ...log,
+          timestamp: log.timestamp.toISOString(),
+        })),
+      });
+    } catch (error) {
+      console.error('Sync error:', error);
+    }
+  }, [token, categories, projects, tasks, earnedRewards, activityLog]);
+
+  useEffect(() => {
+    const loadCloudData = async () => {
+      try {
+        const data = await api.getData(token);
+        if (data.categories) setCategories(data.categories);
+        if (data.projects) setProjects(data.projects);
+        if (data.tasks) {
+          setTasks(data.tasks.map((t: any) => ({
+            ...t,
+            createdAt: new Date(t.created_at),
+            scheduledDate: t.scheduled_date ? new Date(t.scheduled_date) : undefined,
+            category: t.category_id,
+            rewardType: t.reward_type,
+            rewardAmount: t.reward_amount,
+            projectId: t.project_id,
+            subProjectId: t.sub_project_id,
+          })));
+        }
+        if (data.rewards) {
+          setEarnedRewards(data.rewards);
+        }
+        if (data.activityLogs) {
+          setActivityLog(data.activityLogs.map((log: any) => ({
+            ...log,
+            timestamp: new Date(log.created_at),
+          })));
+        }
+      } catch (error) {
+        console.error('Load error:', error);
+      }
+    };
+    loadCloudData();
+  }, [token]);
+
+  useEffect(() => {
+    const interval = setInterval(syncToCloud, 30000);
+    return () => clearInterval(interval);
+  }, [syncToCloud]);
 
   const addActivityLog = (action: string, description: string) => {
     const log: ActivityLog = {
@@ -646,7 +713,16 @@ const Index = () => {
               <h1 className="text-3xl font-bold text-foreground mb-1">Задачник Pro</h1>
               <p className="text-sm text-muted-foreground">Управляй проектами и достигай целей</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
+              <span className="text-sm text-muted-foreground mr-2">{user.username}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={syncToCloud}
+                className="gap-2"
+              >
+                <Icon name="Cloud" size={16} />
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -654,6 +730,14 @@ const Index = () => {
                 className="gap-2"
               >
                 <Icon name={isDarkMode ? 'Sun' : 'Moon'} size={16} />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onLogout}
+                className="gap-2"
+              >
+                <Icon name="LogOut" size={16} />
               </Button>
               <Dialog open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                 <DialogTrigger asChild>

@@ -1,0 +1,13 @@
+{
+  "tests": [
+    {
+      "name": "Get all user data requires auth",
+      "method": "GET",
+      "expectedStatus": 401,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
