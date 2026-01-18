@@ -1,0 +1,282 @@
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import Icon from '@/components/ui/icon';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
+import type { Task, Category, ActivityLog, EarnedRewards } from '@/types/task';
+import { ICONS_LIST, COLORS_LIST } from '@/types/task';
+
+interface CategoriesRewardsViewProps {
+  viewType: 'categories' | 'rewards' | 'history';
+  tasks: Task[];
+  categories: Category[];
+  activityLog: ActivityLog[];
+  earnedRewards: EarnedRewards;
+  isCategoryDialogOpen: boolean;
+  setIsCategoryDialogOpen: (open: boolean) => void;
+  isRewardDialogOpen: boolean;
+  setIsRewardDialogOpen: (open: boolean) => void;
+  newCategory: {
+    name: string;
+    icon: string;
+    color: string;
+  };
+  setNewCategory: (category: any) => void;
+  editingCategory: Category | null;
+  setEditingCategory: (category: Category | null) => void;
+  manualRewards: {
+    points: number;
+    minutes: number;
+    rubles: number;
+  };
+  setManualRewards: (rewards: any) => void;
+  handleCreateCategory: () => void;
+  handleEditCategory: (category: Category) => void;
+  handleUpdateCategory: () => void;
+  handleDeleteCategory: (id: string) => void;
+  handleAddManualReward: () => void;
+}
+
+export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
+  const {
+    viewType,
+    tasks,
+    categories,
+    activityLog,
+    earnedRewards,
+    isCategoryDialogOpen,
+    setIsCategoryDialogOpen,
+    isRewardDialogOpen,
+    setIsRewardDialogOpen,
+    newCategory,
+    setNewCategory,
+    editingCategory,
+    setEditingCategory,
+    manualRewards,
+    setManualRewards,
+    handleCreateCategory,
+    handleEditCategory,
+    handleUpdateCategory,
+    handleDeleteCategory,
+    handleAddManualReward,
+  } = props;
+
+  if (viewType === 'categories') {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">Категории</h2>
+          <Dialog open={isCategoryDialogOpen} onOpenChange={(open) => {
+            setIsCategoryDialogOpen(open);
+            if (!open) {
+              setEditingCategory(null);
+              setNewCategory({ name: '', icon: 'Star', color: 'bg-blue-500' });
+            }
+          }}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-2">
+                <Icon name="Plus" size={16} />
+                Новая категория
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{editingCategory ? 'Редактировать категорию' : 'Новая категория'}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Название</label>
+                  <Input
+                    value={newCategory.name}
+                    onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                    placeholder="Название категории"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Иконка</label>
+                  <div className="grid grid-cols-8 gap-2">
+                    {ICONS_LIST.map(icon => (
+                      <Button
+                        key={icon}
+                        variant={newCategory.icon === icon ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setNewCategory({ ...newCategory, icon })}
+                      >
+                        <Icon name={icon} size={16} />
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Цвет</label>
+                  <div className="grid grid-cols-5 gap-2">
+                    {COLORS_LIST.map(color => (
+                      <button
+                        key={color}
+                        className={`${color} h-10 rounded-md ${newCategory.color === color ? 'ring-2 ring-foreground' : ''}`}
+                        onClick={() => setNewCategory({ ...newCategory, color })}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <Button onClick={editingCategory ? handleUpdateCategory : handleCreateCategory} className="w-full">
+                  {editingCategory ? 'Обновить' : 'Создать'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+        <div className="grid gap-3 grid-cols-2">
+          {categories.map(category => (
+            <Card key={category.id} className="p-4 hover:shadow-md transition-all">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <div className={`${category.color} w-10 h-10 rounded-lg flex items-center justify-center`}>
+                    <Icon name={category.icon} size={20} className="text-white" />
+                  </div>
+                  <h3 className="font-semibold">{category.name}</h3>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditCategory(category)}
+                  >
+                    <Icon name="Edit" size={16} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteCategory(category.id)}
+                  >
+                    <Icon name="Trash2" size={16} />
+                  </Button>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {tasks.filter(t => t.category === category.id).length} задач
+              </p>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (viewType === 'rewards') {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">Награды</h2>
+          <Dialog open={isRewardDialogOpen} onOpenChange={setIsRewardDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-2">
+                <Icon name="Plus" size={16} />
+                Добавить награды
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Добавить награды вручную</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Баллы</label>
+                  <Input
+                    type="number"
+                    value={manualRewards.points}
+                    onChange={(e) => setManualRewards({ ...manualRewards, points: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Минуты</label>
+                  <Input
+                    type="number"
+                    value={manualRewards.minutes}
+                    onChange={(e) => setManualRewards({ ...manualRewards, minutes: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Рубли</label>
+                  <Input
+                    type="number"
+                    value={manualRewards.rubles}
+                    onChange={(e) => setManualRewards({ ...manualRewards, rubles: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+                <Button onClick={handleAddManualReward} className="w-full">Добавить</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+        
+        <div className="grid gap-4 grid-cols-3 mb-6">
+          {earnedRewards.points > 0 && (
+            <Card className="p-6 text-center">
+              <Icon name="Star" size={32} className="mx-auto mb-2 text-yellow-500" />
+              <p className="text-3xl font-bold text-foreground">{earnedRewards.points}</p>
+              <p className="text-sm text-muted-foreground">Баллов заработано</p>
+            </Card>
+          )}
+          {earnedRewards.minutes > 0 && (
+            <Card className="p-6 text-center">
+              <Icon name="Clock" size={32} className="mx-auto mb-2 text-blue-500" />
+              <p className="text-3xl font-bold text-foreground">{earnedRewards.minutes}</p>
+              <p className="text-sm text-muted-foreground">Минут заработано</p>
+            </Card>
+          )}
+          {earnedRewards.rubles > 0 && (
+            <Card className="p-6 text-center">
+              <Icon name="DollarSign" size={32} className="mx-auto mb-2 text-green-500" />
+              <p className="text-3xl font-bold text-foreground">{earnedRewards.rubles}</p>
+              <p className="text-sm text-muted-foreground">Рублей заработано</p>
+            </Card>
+          )}
+        </div>
+
+        {earnedRewards.points === 0 && earnedRewards.minutes === 0 && earnedRewards.rubles === 0 && (
+          <Card className="p-8 text-center">
+            <Icon name="Trophy" size={48} className="mx-auto mb-3 text-muted-foreground" />
+            <p className="text-muted-foreground">Выполняйте задачи, чтобы зарабатывать награды</p>
+          </Card>
+        )}
+      </div>
+    );
+  }
+
+  if (viewType === 'history') {
+    return (
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Журнал действий</h2>
+        <div className="space-y-2">
+          {activityLog.length === 0 ? (
+            <Card className="p-8 text-center">
+              <Icon name="History" size={48} className="mx-auto mb-3 text-muted-foreground" />
+              <p className="text-muted-foreground">История действий пуста</p>
+            </Card>
+          ) : (
+            activityLog.map(log => (
+              <Card key={log.id} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-sm mb-1">{log.action}</h3>
+                    <p className="text-sm text-muted-foreground">{log.description}</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {format(log.timestamp, 'HH:mm', { locale: ru })}
+                  </span>
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+export default CategoriesRewardsView;
