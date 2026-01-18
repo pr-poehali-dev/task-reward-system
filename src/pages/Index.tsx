@@ -236,29 +236,7 @@ const Index = ({ user, token, onLogout }: IndexProps) => {
     const loadCloudData = async () => {
       try {
         const data = await api.getData(token);
-        if (data.categories) setCategories(data.categories);
-        if (data.projects) setProjects(data.projects);
-        if (data.tasks) {
-          setTasks(data.tasks.map((t: any) => ({
-            ...t,
-            createdAt: new Date(t.created_at),
-            scheduledDate: t.scheduled_date ? new Date(t.scheduled_date) : undefined,
-            category: t.category_id,
-            rewardType: t.reward_type,
-            rewardAmount: t.reward_amount,
-            projectId: t.project_id,
-            subProjectId: t.sub_project_id,
-          })));
-        }
-        if (data.rewards) {
-          setEarnedRewards(data.rewards);
-        }
-        if (data.activityLogs) {
-          setActivityLog(data.activityLogs.map((log: any) => ({
-            ...log,
-            timestamp: new Date(log.created_at),
-          })));
-        }
+        console.log('Loaded cloud data:', data);
       } catch (error) {
         console.error('Load error:', error);
       }
