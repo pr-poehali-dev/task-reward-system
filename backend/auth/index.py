@@ -159,11 +159,17 @@ def handle_login(cursor, body: dict) -> dict:
 def handle_verify(cursor, event: dict) -> dict:
     token = event.get('headers', {}).get('X-Authorization', '').replace('Bearer ', '')
     
+    print(f"[VERIFY] Token from headers: {token[:20] if token else 'EMPTY'}...")
+    
     if not token:
+        print(f"[VERIFY] No token provided")
         return error_response('Token required', 401)
     
     user_id = verify_token(token)
+    print(f"[VERIFY] Token decoded user_id: {user_id}")
+    
     if not user_id:
+        print(f"[VERIFY] Invalid token")
         return error_response('Invalid token', 401)
     
     cursor.execute(
@@ -172,9 +178,13 @@ def handle_verify(cursor, event: dict) -> dict:
     )
     user = cursor.fetchone()
     
+    print(f"[VERIFY] User found: {bool(user)}")
+    
     if not user:
+        print(f"[VERIFY] User not found for id: {user_id}")
         return error_response('User not found', 404)
     
+    print(f"[VERIFY] Success for user: {user['email']}")
     return success_response({'user': dict(user)})
 
 def hash_password(password: str) -> str:
