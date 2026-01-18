@@ -119,7 +119,10 @@ def handle_login(cursor, body: dict) -> dict:
     email = body.get('email', '').strip().lower()
     password = body.get('password', '')
     
+    print(f"[LOGIN] Attempt for email: {email}")
+    
     if not email or not password:
+        print(f"[LOGIN] Missing credentials: email={bool(email)}, password={bool(password)}")
         return error_response('Email and password are required', 400)
     
     cursor.execute(
@@ -128,10 +131,21 @@ def handle_login(cursor, body: dict) -> dict:
     )
     user = cursor.fetchone()
     
-    if not user or not verify_password(password, user['password_hash']):
+    print(f"[LOGIN] User found: {bool(user)}")
+    
+    if not user:
+        print(f"[LOGIN] User not found for email: {email}")
+        return error_response('Invalid email or password', 401)
+    
+    password_valid = verify_password(password, user['password_hash'])
+    print(f"[LOGIN] Password valid: {password_valid}")
+    
+    if not password_valid:
+        print(f"[LOGIN] Invalid password for email: {email}")
         return error_response('Invalid email or password', 401)
     
     token = generate_token(user['id'])
+    print(f"[LOGIN] Success for user_id: {user['id']}, token generated")
     
     return success_response({
         'user': {
