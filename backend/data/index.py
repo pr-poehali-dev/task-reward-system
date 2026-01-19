@@ -34,20 +34,12 @@ def handler(event: dict, context) -> dict:
         conn = psycopg2.connect(dsn)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         
-        path = event.get('path', '/')
-        
         if method == 'GET':
-            if '/sync' in path:
-                return handle_get_all_data(cursor, user_id)
-            else:
-                return error_response('Not found', 404)
+            return handle_get_all_data(cursor, user_id)
         
         elif method == 'POST':
-            if '/sync' in path:
-                body = json.loads(event.get('body', '{}'))
-                return handle_sync_data(cursor, conn, user_id, body)
-            else:
-                return error_response('Not found', 404)
+            body = json.loads(event.get('body', '{}'))
+            return handle_sync_data(cursor, conn, user_id, body)
         
         return error_response('Method not allowed', 405)
         
