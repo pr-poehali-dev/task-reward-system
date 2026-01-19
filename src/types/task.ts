@@ -14,10 +14,10 @@ export interface Project {
   name: string;
   icon: string;
   color: string;
-  subProjects: SubProject[];
+  sections: Section[];
 }
 
-export interface SubProject {
+export interface Section {
   id: string;
   name: string;
   projectId: string;
@@ -34,7 +34,7 @@ export interface Task {
   createdAt: Date;
   scheduledDate?: Date;
   projectId: string;
-  subProjectId?: string;
+  sectionId?: string;
 }
 
 export interface ActivityLog {

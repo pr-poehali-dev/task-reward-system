@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
-import type { Task, Category, Project, SubProject, ActivityLog, EarnedRewards, RewardType, ViewMode, SidebarView } from '@/types/task';
+import type { Task, Category, Project, Section, ActivityLog, EarnedRewards, RewardType, ViewMode, SidebarView } from '@/types/task';
 
 export const useTaskManager = (token: string) => {
   const [tasks, setTasks] = useState<Task[]>(() => {
@@ -31,7 +31,7 @@ export const useTaskManager = (token: string) => {
   const [projects, setProjects] = useState<Project[]>(() => {
     const saved = localStorage.getItem('projects');
     return saved ? JSON.parse(saved) : [
-      { id: 'default', name: 'Главный проект', icon: 'Folder', color: 'bg-blue-500', subProjects: [] },
+      { id: 'default', name: 'Главный проект', icon: 'Folder', color: 'bg-blue-500', sections: [] },
     ];
   });
 
@@ -80,7 +80,7 @@ export const useTaskManager = (token: string) => {
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
-  const [isSubProjectDialogOpen, setIsSubProjectDialogOpen] = useState(false);
+  const [isSectionDialogOpen, setIsSectionDialogOpen] = useState(false);
   const [isRewardDialogOpen, setIsRewardDialogOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -89,9 +89,9 @@ export const useTaskManager = (token: string) => {
     title: '',
     description: '',
     category: 'work',
-    rewardType: 'points' as RewardType,
+    rewardType: 'minutes' as RewardType,
     rewardAmount: 10,
-    subProjectId: '',
+    sectionId: '',
   });
 
   const [newCategory, setNewCategory] = useState({
@@ -106,7 +106,7 @@ export const useTaskManager = (token: string) => {
     color: 'bg-blue-500',
   });
 
-  const [newSubProject, setNewSubProject] = useState({
+  const [newSection, setNewSection] = useState({
     name: '',
   });
 
@@ -236,9 +236,9 @@ export const useTaskManager = (token: string) => {
       title: '',
       description: '',
       category: categories[0]?.id || 'work',
-      rewardType: 'points',
+      rewardType: 'minutes',
       rewardAmount: 10,
-      subProjectId: '',
+      sectionId: '',
     });
     setSelectedDate(new Date());
     toast.success('Задача создана!');
@@ -347,7 +347,7 @@ export const useTaskManager = (token: string) => {
     const project: Project = {
       id: Date.now().toString(),
       ...newProject,
-      subProjects: [],
+      sections: [],
     };
 
     setProjects([...projects, project]);
@@ -407,44 +407,44 @@ export const useTaskManager = (token: string) => {
     }
   };
 
-  const handleCreateSubProject = () => {
-    if (!newSubProject.name.trim()) {
-      toast.error('Введите название подпроекта');
+  const handleCreateSection = () => {
+    if (!newSection.name.trim()) {
+      toast.error('Введите название раздела');
       return;
     }
 
-    const subProject: SubProject = {
+    const section: Section = {
       id: Date.now().toString(),
-      name: newSubProject.name,
+      name: newSection.name,
       projectId: selectedProjectId,
     };
 
     setProjects(projects.map(proj => 
       proj.id === selectedProjectId 
-        ? { ...proj, subProjects: [...proj.subProjects, subProject] }
+        ? { ...proj, sections: [...proj.sections, section] }
         : proj
     ));
 
-    setIsSubProjectDialogOpen(false);
-    setNewSubProject({ name: '' });
-    toast.success('Подпроект создан!');
-    addActivityLog('Создание подпроекта', `Создан подпроект: ${subProject.name}`);
+    setIsSectionDialogOpen(false);
+    setNewSection({ name: '' });
+    toast.success('Раздел создан!');
+    addActivityLog('Создание раздела', `Создан раздел: ${section.name}`);
   };
 
-  const handleDeleteSubProject = (subProjectId: string) => {
+  const handleDeleteSection = (sectionId: string) => {
     const project = projects.find(p => p.id === selectedProjectId);
-    const subProject = project?.subProjects.find(sp => sp.id === subProjectId);
+    const section = project?.sections.find(s => s.id === sectionId);
     
     setProjects(projects.map(proj => 
       proj.id === selectedProjectId 
-        ? { ...proj, subProjects: proj.subProjects.filter(sp => sp.id !== subProjectId) }
+        ? { ...proj, sections: proj.sections.filter(s => s.id !== sectionId) }
         : proj
     ));
-    setTasks(tasks.filter(task => task.subProjectId !== subProjectId));
-    toast.success('Подпроект удален');
+    setTasks(tasks.filter(task => task.sectionId !== sectionId));
+    toast.success('Раздел удалён');
     
-    if (subProject) {
-      addActivityLog('Удаление подпроекта', `Удален подпроект: ${subProject.name}`);
+    if (section) {
+      addActivityLog('Удаление раздела', `Удалён раздел: ${section.name}`);
     }
   };
 
@@ -503,8 +503,8 @@ export const useTaskManager = (token: string) => {
     setIsCategoryDialogOpen,
     isProjectDialogOpen,
     setIsProjectDialogOpen,
-    isSubProjectDialogOpen,
-    setIsSubProjectDialogOpen,
+    isSectionDialogOpen,
+    setIsSectionDialogOpen,
     isRewardDialogOpen,
     setIsRewardDialogOpen,
     isCalendarOpen,
@@ -517,8 +517,8 @@ export const useTaskManager = (token: string) => {
     setNewCategory,
     newProject,
     setNewProject,
-    newSubProject,
-    setNewSubProject,
+    newSection,
+    setNewSection,
     editingCategory,
     setEditingCategory,
     editingProject,
@@ -537,8 +537,8 @@ export const useTaskManager = (token: string) => {
     handleEditProject,
     handleUpdateProject,
     handleDeleteProject,
-    handleCreateSubProject,
-    handleDeleteSubProject,
+    handleCreateSection,
+    handleDeleteSection,
     handleAddManualReward,
     getCategoryById,
     syncToCloud,

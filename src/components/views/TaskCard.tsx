@@ -25,7 +25,7 @@ export const TaskCard = ({
 }: TaskCardProps) => {
   const category = getCategoryById(task.category);
   const project = projects.find(p => p.id === task.projectId);
-  const subProject = project?.subProjects.find(sp => sp.id === task.subProjectId);
+  const section = project?.sections.find(s => s.id === task.sectionId);
 
   return (
     <Card key={task.id} className="p-4 hover:shadow-md transition-all">
@@ -44,8 +44,8 @@ export const TaskCard = ({
                 {project.name}
               </Badge>
             )}
-            {subProject && (
-              <Badge variant="outline" className="text-xs">{subProject.name}</Badge>
+            {section && (
+              <Badge variant="outline" className="text-xs">{section.name}</Badge>
             )}
           </div>
           <h3 className={`font-semibold mb-1 ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>

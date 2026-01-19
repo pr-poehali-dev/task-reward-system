@@ -23,8 +23,8 @@ interface TaskViewsProps {
   setIsCategoryDialogOpen: (open: boolean) => void;
   isProjectDialogOpen: boolean;
   setIsProjectDialogOpen: (open: boolean) => void;
-  isSubProjectDialogOpen: boolean;
-  setIsSubProjectDialogOpen: (open: boolean) => void;
+  isSectionDialogOpen: boolean;
+  setIsSectionDialogOpen: (open: boolean) => void;
   isRewardDialogOpen: boolean;
   setIsRewardDialogOpen: (open: boolean) => void;
   newTask: {
@@ -33,7 +33,7 @@ interface TaskViewsProps {
     category: string;
     rewardType: RewardType;
     rewardAmount: number;
-    subProjectId: string;
+    sectionId: string;
   };
   setNewTask: (task: any) => void;
   newCategory: {
@@ -48,10 +48,10 @@ interface TaskViewsProps {
     color: string;
   };
   setNewProject: (project: any) => void;
-  newSubProject: {
+  newSection: {
     name: string;
   };
-  setNewSubProject: (subProject: any) => void;
+  setNewSection: (section: any) => void;
   editingCategory: Category | null;
   setEditingCategory: (category: Category | null) => void;
   editingProject: Project | null;
@@ -73,8 +73,8 @@ interface TaskViewsProps {
   handleEditProject: (project: Project) => void;
   handleUpdateProject: () => void;
   handleDeleteProject: (id: string) => void;
-  handleCreateSubProject: () => void;
-  handleDeleteSubProject: (id: string) => void;
+  handleCreateSection: () => void;
+  handleDeleteSection: (id: string) => void;
   handleAddManualReward: () => void;
   getCategoryById: (id: string) => Category | undefined;
   setSidebarView: (view: SidebarView) => void;
@@ -92,31 +92,14 @@ export const TaskViews = (props: TaskViewsProps) => {
         selectedProjectId={props.selectedProjectId}
         setSelectedProjectId={props.setSelectedProjectId}
         selectedProject={props.selectedProject}
-        taskViewMode={props.taskViewMode}
-        setTaskViewMode={props.setTaskViewMode}
-        isTaskDialogOpen={props.isTaskDialogOpen}
-        setIsTaskDialogOpen={props.setIsTaskDialogOpen}
-        isProjectDialogOpen={props.isProjectDialogOpen}
-        setIsProjectDialogOpen={props.setIsProjectDialogOpen}
-        isSubProjectDialogOpen={props.isSubProjectDialogOpen}
-        setIsSubProjectDialogOpen={props.setIsSubProjectDialogOpen}
-        newTask={props.newTask}
-        setNewTask={props.setNewTask}
-        newProject={props.newProject}
-        setNewProject={props.setNewProject}
-        newSubProject={props.newSubProject}
-        setNewSubProject={props.setNewSubProject}
-        editingProject={props.editingProject}
-        setEditingProject={props.setEditingProject}
-        handleCreateTask={props.handleCreateTask}
+        isSectionDialogOpen={props.isSectionDialogOpen}
+        setIsSectionDialogOpen={props.setIsSectionDialogOpen}
+        newSection={props.newSection}
+        setNewSection={props.setNewSection}
+        handleCreateSection={props.handleCreateSection}
+        handleDeleteSection={props.handleDeleteSection}
         handleCompleteTask={props.handleCompleteTask}
         handleDeleteTask={props.handleDeleteTask}
-        handleCreateProject={props.handleCreateProject}
-        handleEditProject={props.handleEditProject}
-        handleUpdateProject={props.handleUpdateProject}
-        handleDeleteProject={props.handleDeleteProject}
-        handleCreateSubProject={props.handleCreateSubProject}
-        handleDeleteSubProject={props.handleDeleteSubProject}
         getCategoryById={props.getCategoryById}
       />
     );

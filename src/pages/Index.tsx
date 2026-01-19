@@ -25,6 +25,19 @@ const Index = ({ user, token, onLogout }: IndexProps) => {
         setSidebarOpen={manager.setSidebarOpen}
         sidebarView={manager.sidebarView}
         setSidebarView={manager.setSidebarView}
+        projects={manager.projects}
+        selectedProjectId={manager.selectedProjectId}
+        setSelectedProjectId={manager.setSelectedProjectId}
+        isProjectDialogOpen={manager.isProjectDialogOpen}
+        setIsProjectDialogOpen={manager.setIsProjectDialogOpen}
+        newProject={manager.newProject}
+        setNewProject={manager.setNewProject}
+        editingProject={manager.editingProject}
+        setEditingProject={manager.setEditingProject}
+        handleCreateProject={manager.handleCreateProject}
+        handleEditProject={manager.handleEditProject}
+        handleUpdateProject={manager.handleUpdateProject}
+        handleDeleteProject={manager.handleDeleteProject}
       />
 
       <div className="flex-1 overflow-auto">
@@ -105,8 +118,8 @@ const Index = ({ user, token, onLogout }: IndexProps) => {
             setIsCategoryDialogOpen={manager.setIsCategoryDialogOpen}
             isProjectDialogOpen={manager.isProjectDialogOpen}
             setIsProjectDialogOpen={manager.setIsProjectDialogOpen}
-            isSubProjectDialogOpen={manager.isSubProjectDialogOpen}
-            setIsSubProjectDialogOpen={manager.setIsSubProjectDialogOpen}
+            isSectionDialogOpen={manager.isSectionDialogOpen}
+            setIsSectionDialogOpen={manager.setIsSectionDialogOpen}
             isRewardDialogOpen={manager.isRewardDialogOpen}
             setIsRewardDialogOpen={manager.setIsRewardDialogOpen}
             newTask={manager.newTask}
@@ -115,8 +128,8 @@ const Index = ({ user, token, onLogout }: IndexProps) => {
             setNewCategory={manager.setNewCategory}
             newProject={manager.newProject}
             setNewProject={manager.setNewProject}
-            newSubProject={manager.newSubProject}
-            setNewSubProject={manager.setNewSubProject}
+            newSection={manager.newSection}
+            setNewSection={manager.setNewSection}
             editingCategory={manager.editingCategory}
             setEditingCategory={manager.setEditingCategory}
             editingProject={manager.editingProject}
@@ -134,8 +147,8 @@ const Index = ({ user, token, onLogout }: IndexProps) => {
             handleEditProject={manager.handleEditProject}
             handleUpdateProject={manager.handleUpdateProject}
             handleDeleteProject={manager.handleDeleteProject}
-            handleCreateSubProject={manager.handleCreateSubProject}
-            handleDeleteSubProject={manager.handleDeleteSubProject}
+            handleCreateSection={manager.handleCreateSection}
+            handleDeleteSection={manager.handleDeleteSection}
             handleAddManualReward={manager.handleAddManualReward}
             getCategoryById={manager.getCategoryById}
             setSidebarView={manager.setSidebarView}
