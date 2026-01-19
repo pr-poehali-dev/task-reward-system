@@ -92,8 +92,6 @@ export const ProjectsView = (props: ProjectsViewProps) => {
   const handleUpdateTask = () => {
     if (!editingTask) return;
     
-    // Здесь нужно вызвать функцию обновления задачи
-    // Пока просто закрываем диалог
     setIsEditDialogOpen(false);
     setEditingTask(null);
   };
@@ -105,15 +103,64 @@ export const ProjectsView = (props: ProjectsViewProps) => {
   const handleCreateTaskInSection = (sectionId: string) => {
     if (!newTask.title.trim()) return;
 
-    // Устанавливаем sectionId в задачу
     setNewTask({ ...newTask, sectionId: sectionId === 'none' ? '' : sectionId });
     
-    // Вызываем основной handler создания задачи
     setTimeout(() => {
       handleCreateTask();
       setAddingToSection(null);
     }, 0);
   };
+
+  if (sections.length === 0) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <div className={`${selectedProject.color} w-10 h-10 rounded-lg flex items-center justify-center`}>
+                <Icon name={selectedProject.icon} size={20} className="text-white" />
+              </div>
+              {selectedProject.name}
+            </h1>
+          </div>
+          <Button size="sm" onClick={() => setIsSectionDialogOpen(true)}>
+            <Icon name="Plus" size={16} className="mr-2" />
+            Новый раздел
+          </Button>
+        </div>
+        
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <Icon name="FolderOpen" size={48} className="mx-auto mb-4 text-muted-foreground" />
+            <p className="text-muted-foreground mb-4">В этом проекте пока нет разделов</p>
+            <Button onClick={() => setIsSectionDialogOpen(true)}>
+              <Icon name="Plus" size={16} className="mr-2" />
+              Создать первый раздел
+            </Button>
+          </div>
+        </div>
+
+        <Dialog open={isSectionDialogOpen} onOpenChange={setIsSectionDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Новый раздел</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Название</label>
+                <Input
+                  value={newSection.name}
+                  onChange={(e) => setNewSection({ name: e.target.value })}
+                  placeholder="Название раздела"
+                />
+              </div>
+              <Button onClick={handleCreateSection} className="w-full">Создать</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -133,59 +180,59 @@ export const ProjectsView = (props: ProjectsViewProps) => {
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-4">
-        {/* Колонка для задач без раздела */}
-        <Card className="flex-shrink-0 w-80 p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Без раздела</h3>
-            <Badge variant="outline">{tasksWithoutSection.length}</Badge>
-          </div>
-          
-          <div className="space-y-2 mb-4">
-            {tasksWithoutSection.map(task => (
-              <Card key={task.id} className="p-3 hover:shadow-md transition-all cursor-pointer" onClick={() => handleEditTask(task)}>
-                <h4 className="font-medium mb-1">{task.title}</h4>
-                {task.description && (
-                  <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
-                )}
-                <div className="flex items-center justify-between">
-                  <Badge variant="secondary" className="text-xs">
-                    {task.rewardType === 'points' ? '⭐' : task.rewardType === 'minutes' ? '⏱️' : '💰'} {task.rewardAmount}
-                  </Badge>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); handleCompleteTask(task.id); }}>
-                      <Icon name="Check" size={14} />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}>
-                      <Icon name="Trash2" size={14} />
-                    </Button>
+        {tasksWithoutSection.length > 0 && (
+          <Card className="flex-shrink-0 w-80 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold">Без раздела</h3>
+              <Badge variant="outline">{tasksWithoutSection.length}</Badge>
+            </div>
+            
+            <div className="space-y-2 mb-4">
+              {tasksWithoutSection.map(task => (
+                <Card key={task.id} className="p-3 hover:shadow-md transition-all cursor-pointer" onClick={() => handleEditTask(task)}>
+                  <h4 className="font-medium mb-1">{task.title}</h4>
+                  {task.description && (
+                    <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <Badge variant="secondary" className="text-xs">
+                      {task.rewardType === 'points' ? '⭐' : task.rewardType === 'minutes' ? '⏱️' : '💰'} {task.rewardAmount}
+                    </Badge>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); handleCompleteTask(task.id); }}>
+                        <Icon name="Check" size={14} />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}>
+                        <Icon name="Trash2" size={14} />
+                      </Button>
+                    </div>
                   </div>
+                </Card>
+              ))}
+            </div>
+
+            {addingToSection === 'none' ? (
+              <Card className="p-3 border-dashed">
+                <Input
+                  placeholder="Название задачи"
+                  value={newTask.title}
+                  onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                  className="mb-2"
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => handleCreateTaskInSection('none')}>Создать</Button>
+                  <Button size="sm" variant="outline" onClick={() => setAddingToSection(null)}>Отмена</Button>
                 </div>
               </Card>
-            ))}
-          </div>
+            ) : (
+              <Button variant="outline" size="sm" className="w-full" onClick={() => handleAddTask('none')}>
+                <Icon name="Plus" size={14} className="mr-2" />
+                Добавить задачу
+              </Button>
+            )}
+          </Card>
+        )}
 
-          {addingToSection === 'none' ? (
-            <Card className="p-3 border-dashed">
-              <Input
-                placeholder="Название задачи"
-                value={newTask.title}
-                onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                className="mb-2"
-              />
-              <div className="flex gap-2">
-                <Button size="sm" onClick={() => handleCreateTaskInSection('none')}>Создать</Button>
-                <Button size="sm" variant="outline" onClick={() => setAddingToSection(null)}>Отмена</Button>
-              </div>
-            </Card>
-          ) : (
-            <Button variant="outline" size="sm" className="w-full" onClick={() => handleAddTask('none')}>
-              <Icon name="Plus" size={14} className="mr-2" />
-              Добавить задачу
-            </Button>
-          )}
-        </Card>
-
-        {/* Колонки для разделов */}
         {sections.map(section => {
           const sectionTasks = activeTasks.filter(t => t.sectionId === section.id);
           
