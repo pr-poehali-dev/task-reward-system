@@ -17,6 +17,8 @@ interface ProjectsViewProps {
   selectedProjectId: string;
   setSelectedProjectId: (id: string) => void;
   selectedProject: Project | undefined;
+  taskViewMode?: 'list' | 'grid';
+  setTaskViewMode?: (mode: 'list' | 'grid') => void;
   isTaskDialogOpen: boolean;
   setIsTaskDialogOpen: (open: boolean) => void;
   isProjectDialogOpen: boolean;
@@ -64,6 +66,8 @@ export const ProjectsView = (props: ProjectsViewProps) => {
     selectedProjectId,
     setSelectedProjectId,
     selectedProject,
+    taskViewMode = 'list',
+    setTaskViewMode,
     isTaskDialogOpen,
     setIsTaskDialogOpen,
     isProjectDialogOpen,
@@ -212,6 +216,22 @@ export const ProjectsView = (props: ProjectsViewProps) => {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Активные задачи</h2>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setTaskViewMode?.('list')}
+                className={taskViewMode === 'list' ? 'bg-accent' : ''}
+              >
+                <Icon name="List" size={16} />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setTaskViewMode?.('grid')}
+                className={taskViewMode === 'grid' ? 'bg-accent' : ''}
+              >
+                <Icon name="LayoutGrid" size={16} />
+              </Button>
               <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
                 <DialogTrigger asChild>
                   <Button size="sm" className="gap-2">
@@ -341,7 +361,7 @@ export const ProjectsView = (props: ProjectsViewProps) => {
             </div>
           )}
 
-          <div className="space-y-3">
+          <div className={taskViewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3' : 'space-y-3'}>
             {activeTasks.length === 0 ? (
               <Card className="p-8 text-center">
                 <Icon name="CheckCircle" size={48} className="mx-auto mb-3 text-muted-foreground" />

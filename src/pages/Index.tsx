@@ -93,6 +93,8 @@ const Index = ({ user, token, onLogout }: IndexProps) => {
             selectedProjectId={manager.selectedProjectId}
             setSelectedProjectId={manager.setSelectedProjectId}
             selectedProject={manager.selectedProject}
+            taskViewMode={manager.taskViewMode}
+            setTaskViewMode={manager.setTaskViewMode}
             activityLog={manager.activityLog}
             earnedRewards={manager.earnedRewards}
             searchQuery={manager.searchQuery}

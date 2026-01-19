@@ -11,6 +11,8 @@ interface TaskViewsProps {
   selectedProjectId: string;
   setSelectedProjectId: (id: string) => void;
   selectedProject: Project | undefined;
+  taskViewMode?: 'list' | 'grid';
+  setTaskViewMode?: (mode: 'list' | 'grid') => void;
   activityLog: ActivityLog[];
   earnedRewards: EarnedRewards;
   searchQuery: string;
@@ -90,6 +92,8 @@ export const TaskViews = (props: TaskViewsProps) => {
         selectedProjectId={props.selectedProjectId}
         setSelectedProjectId={props.setSelectedProjectId}
         selectedProject={props.selectedProject}
+        taskViewMode={props.taskViewMode}
+        setTaskViewMode={props.setTaskViewMode}
         isTaskDialogOpen={props.isTaskDialogOpen}
         setIsTaskDialogOpen={props.setIsTaskDialogOpen}
         isProjectDialogOpen={props.isProjectDialogOpen}

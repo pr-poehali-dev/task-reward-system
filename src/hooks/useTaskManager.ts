@@ -37,6 +37,10 @@ export const useTaskManager = (token: string) => {
 
   const [selectedProjectId, setSelectedProjectId] = useState('default');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [taskViewMode, setTaskViewMode] = useState<'list' | 'grid'>(() => {
+    const saved = localStorage.getItem('taskViewMode');
+    return saved ? JSON.parse(saved) : 'list';
+  });
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
     return saved ? JSON.parse(saved) : true;
@@ -138,6 +142,10 @@ export const useTaskManager = (token: string) => {
   useEffect(() => {
     localStorage.setItem('earnedRewards', JSON.stringify(earnedRewards));
   }, [earnedRewards]);
+
+  useEffect(() => {
+    localStorage.setItem('taskViewMode', JSON.stringify(taskViewMode));
+  }, [taskViewMode]);
 
   const syncToCloud = useCallback(async () => {
     try {
@@ -463,6 +471,8 @@ export const useTaskManager = (token: string) => {
     setSelectedProjectId,
     viewMode,
     setViewMode,
+    taskViewMode,
+    setTaskViewMode,
     isDarkMode,
     toggleTheme,
     sidebarOpen,
