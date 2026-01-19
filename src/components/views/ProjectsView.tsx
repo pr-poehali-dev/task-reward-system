@@ -23,6 +23,16 @@ interface ProjectsViewProps {
   setIsSectionDialogOpen: (open: boolean) => void;
   newSection: { name: string };
   setNewSection: (section: any) => void;
+  newTask: {
+    title: string;
+    description: string;
+    category: string;
+    rewardType: RewardType;
+    rewardAmount: number;
+    sectionId: string;
+  };
+  setNewTask: (task: any) => void;
+  handleCreateTask: () => void;
   handleCreateSection: () => void;
   handleDeleteSection: (id: string) => void;
   handleCompleteTask: (id: string) => void;
@@ -39,6 +49,9 @@ export const ProjectsView = (props: ProjectsViewProps) => {
     setIsSectionDialogOpen,
     newSection,
     setNewSection,
+    newTask,
+    setNewTask,
+    handleCreateTask,
     handleCreateSection,
     handleDeleteSection,
     handleCompleteTask,
@@ -51,14 +64,6 @@ export const ProjectsView = (props: ProjectsViewProps) => {
   const [editForm, setEditForm] = useState<Partial<Task>>({});
 
   const [addingToSection, setAddingToSection] = useState<string | null>(null);
-  const [newTaskForm, setNewTaskForm] = useState({
-    title: '',
-    description: '',
-    category: categories[0]?.id || '',
-    rewardType: 'minutes' as RewardType,
-    rewardAmount: 10,
-    scheduledDate: new Date(),
-  });
 
   if (!selectedProject) {
     return (
@@ -97,21 +102,17 @@ export const ProjectsView = (props: ProjectsViewProps) => {
     setAddingToSection(sectionId);
   };
 
-  const handleCreateTask = (sectionId: string) => {
-    if (!newTaskForm.title.trim()) return;
+  const handleCreateTaskInSection = (sectionId: string) => {
+    if (!newTask.title.trim()) return;
 
-    // Создаём задачу (логика будет добавлена позже)
-    console.log('Creating task:', { ...newTaskForm, sectionId });
+    // Устанавливаем sectionId в задачу
+    setNewTask({ ...newTask, sectionId: sectionId === 'none' ? '' : sectionId });
     
-    setAddingToSection(null);
-    setNewTaskForm({
-      title: '',
-      description: '',
-      category: categories[0]?.id || '',
-      rewardType: 'minutes',
-      rewardAmount: 10,
-      scheduledDate: new Date(),
-    });
+    // Вызываем основной handler создания задачи
+    setTimeout(() => {
+      handleCreateTask();
+      setAddingToSection(null);
+    }, 0);
   };
 
   return (
@@ -167,12 +168,12 @@ export const ProjectsView = (props: ProjectsViewProps) => {
             <Card className="p-3 border-dashed">
               <Input
                 placeholder="Название задачи"
-                value={newTaskForm.title}
-                onChange={(e) => setNewTaskForm({ ...newTaskForm, title: e.target.value })}
+                value={newTask.title}
+                onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                 className="mb-2"
               />
               <div className="flex gap-2">
-                <Button size="sm" onClick={() => handleCreateTask('none')}>Создать</Button>
+                <Button size="sm" onClick={() => handleCreateTaskInSection('none')}>Создать</Button>
                 <Button size="sm" variant="outline" onClick={() => setAddingToSection(null)}>Отмена</Button>
               </div>
             </Card>
@@ -233,12 +234,12 @@ export const ProjectsView = (props: ProjectsViewProps) => {
                 <Card className="p-3 border-dashed">
                   <Input
                     placeholder="Название задачи"
-                    value={newTaskForm.title}
-                    onChange={(e) => setNewTaskForm({ ...newTaskForm, title: e.target.value })}
+                    value={newTask.title}
+                    onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                     className="mb-2"
                   />
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={() => handleCreateTask(section.id)}>Создать</Button>
+                    <Button size="sm" onClick={() => handleCreateTaskInSection(section.id)}>Создать</Button>
                     <Button size="sm" variant="outline" onClick={() => setAddingToSection(null)}>Отмена</Button>
                   </div>
                 </Card>

@@ -96,6 +96,9 @@ export const TaskViews = (props: TaskViewsProps) => {
         setIsSectionDialogOpen={props.setIsSectionDialogOpen}
         newSection={props.newSection}
         setNewSection={props.setNewSection}
+        newTask={props.newTask}
+        setNewTask={props.setNewTask}
+        handleCreateTask={props.handleCreateTask}
         handleCreateSection={props.handleCreateSection}
         handleDeleteSection={props.handleDeleteSection}
         handleCompleteTask={props.handleCompleteTask}
