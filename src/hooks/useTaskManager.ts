@@ -35,7 +35,14 @@ export const useTaskManager = (token: string) => {
     ];
   });
 
-  const [selectedProjectId, setSelectedProjectId] = useState('default');
+  const [selectedProjectId, setSelectedProjectId] = useState(() => {
+    const saved = localStorage.getItem('projects');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return parsed[0]?.id || 'default';
+    }
+    return 'default';
+  });
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [taskViewMode, setTaskViewMode] = useState<'list' | 'grid'>(() => {
     const saved = localStorage.getItem('taskViewMode');
@@ -113,6 +120,13 @@ export const useTaskManager = (token: string) => {
   });
 
   const selectedProject = projects.find(p => p.id === selectedProjectId);
+
+  // Если проект не найден, выбираем первый доступный
+  useEffect(() => {
+    if (!selectedProject && projects.length > 0) {
+      setSelectedProjectId(projects[0].id);
+    }
+  }, [selectedProject, projects]);
 
   useEffect(() => {
     if (isDarkMode) {

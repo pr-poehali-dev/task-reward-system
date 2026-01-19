@@ -278,7 +278,7 @@ export const ProjectsView = (props: ProjectsViewProps) => {
                         </SelectContent>
                       </Select>
                     </div>
-                    {selectedProject.subProjects.length > 0 && (
+                    {selectedProject && selectedProject.subProjects.length > 0 && (
                       <div>
                         <label className="text-sm font-medium mb-2 block">Подпроект</label>
                         <Select value={newTask.subProjectId} onValueChange={(value) => setNewTask({ ...newTask, subProjectId: value })}>
