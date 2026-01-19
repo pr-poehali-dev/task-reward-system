@@ -67,15 +67,15 @@ def handle_get_all_data(cursor, user_id: int) -> dict:
     projects = [dict(row) for row in cursor.fetchall()]
     
     cursor.execute(
-        "SELECT sp.* FROM sub_projects sp "
-        "JOIN projects p ON sp.project_id = p.id "
-        "WHERE p.user_id = %s ORDER BY sp.created_at",
+        "SELECT s.* FROM sections s "
+        "JOIN projects p ON s.project_id = p.id "
+        "WHERE p.user_id = %s ORDER BY s.created_at",
         (user_id,)
     )
-    sub_projects = [dict(row) for row in cursor.fetchall()]
+    sections = [dict(row) for row in cursor.fetchall()]
     
     for project in projects:
-        project['subProjects'] = [sp for sp in sub_projects if sp['project_id'] == project['id']]
+        project['sections'] = [s for s in sections if s['project_id'] == project['id']]
     
     cursor.execute("SELECT * FROM tasks WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
     tasks = []
@@ -147,14 +147,14 @@ def handle_sync_data(cursor, conn, user_id: int, data: dict) -> dict:
                 (proj['id'], user_id, proj['name'], proj['icon'], proj['color'])
             )
         
-        cursor.execute("SELECT id FROM sub_projects WHERE project_id = %s", (proj['id'],))
-        existing_subproj_ids = set(row['id'] for row in cursor.fetchall())
+        cursor.execute("SELECT id FROM sections WHERE project_id = %s", (proj['id'],))
+        existing_section_ids = set(row['id'] for row in cursor.fetchall())
         
-        for subproj in proj.get('subProjects', []):
-            if subproj['id'] not in existing_subproj_ids:
+        for section in proj.get('sections', []):
+            if section['id'] not in existing_section_ids:
                 cursor.execute(
-                    "INSERT INTO sub_projects (id, project_id, name) VALUES (%s, %s, %s)",
-                    (subproj['id'], proj['id'], subproj['name'])
+                    "INSERT INTO sections (id, project_id, name) VALUES (%s, %s, %s)",
+                    (section['id'], proj['id'], section['name'])
                 )
     
     cursor.execute("SELECT id FROM tasks WHERE user_id = %s", (user_id,))
@@ -168,19 +168,19 @@ def handle_sync_data(cursor, conn, user_id: int, data: dict) -> dict:
             cursor.execute(
                 "UPDATE tasks SET title = %s, description = %s, category_id = %s, "
                 "reward_type = %s, reward_amount = %s, completed = %s, "
-                "scheduled_date = %s, completed_at = %s, project_id = %s, sub_project_id = %s "
+                "scheduled_date = %s, completed_at = %s, project_id = %s, section_id = %s "
                 "WHERE id = %s AND user_id = %s",
                 (task['title'], task['description'], task['category'], 
                  task['rewardType'], task['rewardAmount'], task['completed'],
-                 scheduled_date, completed_at, task['projectId'], task.get('subProjectId'),
+                 scheduled_date, completed_at, task['projectId'], task.get('sectionId'),
                  task['id'], user_id)
             )
         else:
             cursor.execute(
-                "INSERT INTO tasks (id, user_id, project_id, sub_project_id, category_id, "
+                "INSERT INTO tasks (id, user_id, project_id, section_id, category_id, "
                 "title, description, reward_type, reward_amount, completed, scheduled_date, completed_at) "
                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                (task['id'], user_id, task['projectId'], task.get('subProjectId'), task['category'],
+                (task['id'], user_id, task['projectId'], task.get('sectionId'), task['category'],
                  task['title'], task['description'], task['rewardType'], task['rewardAmount'],
                  task['completed'], scheduled_date, completed_at)
             )
