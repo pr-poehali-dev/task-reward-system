@@ -281,12 +281,12 @@ export const ProjectsView = (props: ProjectsViewProps) => {
                     {selectedProject && selectedProject.subProjects.length > 0 && (
                       <div>
                         <label className="text-sm font-medium mb-2 block">Подпроект</label>
-                        <Select value={newTask.subProjectId} onValueChange={(value) => setNewTask({ ...newTask, subProjectId: value })}>
+                        <Select value={newTask.subProjectId || 'none'} onValueChange={(value) => setNewTask({ ...newTask, subProjectId: value === 'none' ? '' : value })}>
                           <SelectTrigger>
                             <SelectValue placeholder="Без подпроекта" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Без подпроекта</SelectItem>
+                            <SelectItem value="none">Без подпроекта</SelectItem>
                             {selectedProject.subProjects.map(sp => (
                               <SelectItem key={sp.id} value={sp.id}>{sp.name}</SelectItem>
                             ))}
