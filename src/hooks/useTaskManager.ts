@@ -30,7 +30,15 @@ export const useTaskManager = (token: string) => {
 
   const [projects, setProjects] = useState<Project[]>(() => {
     const saved = localStorage.getItem('projects');
-    return saved ? JSON.parse(saved) : [
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Миграция: добавляем sections если его нет
+      return parsed.map((p: any) => ({
+        ...p,
+        sections: p.sections || []
+      }));
+    }
+    return [
       { id: 'default', name: 'Главный проект', icon: 'Folder', color: 'bg-blue-500', sections: [] },
     ];
   });
@@ -187,6 +195,32 @@ export const useTaskManager = (token: string) => {
       try {
         const data = await api.getData(token);
         console.log('Loaded cloud data:', data);
+        
+        if (data.projects && data.projects.length > 0) {
+          // Миграция: добавляем sections если его нет
+          const migratedProjects = data.projects.map((p: any) => ({
+            ...p,
+            sections: p.sections || []
+          }));
+          setProjects(migratedProjects);
+        }
+        
+        if (data.categories && data.categories.length > 0) {
+          setCategories(data.categories);
+        }
+        
+        if (data.tasks && data.tasks.length > 0) {
+          const parsedTasks = data.tasks.map((t: any) => ({
+            ...t,
+            createdAt: new Date(t.created_at),
+            scheduledDate: t.scheduled_date ? new Date(t.scheduled_date) : undefined,
+          }));
+          setTasks(parsedTasks);
+        }
+        
+        if (data.rewards) {
+          setEarnedRewards(data.rewards);
+        }
       } catch (error) {
         console.error('Load error:', error);
       }
@@ -421,7 +455,7 @@ export const useTaskManager = (token: string) => {
 
     setProjects(projects.map(proj => 
       proj.id === selectedProjectId 
-        ? { ...proj, sections: [...proj.sections, section] }
+        ? { ...proj, sections: [...(proj.sections || []), section] }
         : proj
     ));
 
@@ -433,11 +467,11 @@ export const useTaskManager = (token: string) => {
 
   const handleDeleteSection = (sectionId: string) => {
     const project = projects.find(p => p.id === selectedProjectId);
-    const section = project?.sections.find(s => s.id === sectionId);
+    const section = project?.sections?.find(s => s.id === sectionId);
     
     setProjects(projects.map(proj => 
       proj.id === selectedProjectId 
-        ? { ...proj, sections: proj.sections.filter(s => s.id !== sectionId) }
+        ? { ...proj, sections: (proj.sections || []).filter(s => s.id !== sectionId) }
         : proj
     ));
     setTasks(tasks.filter(task => task.sectionId !== sectionId));
