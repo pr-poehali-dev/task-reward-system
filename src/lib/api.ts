@@ -58,20 +58,25 @@ export const api = {
   },
 
   async verify(token: string): Promise<{ user: User }> {
-    const response = await fetch(API_URLS.auth, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ action: 'verify' }),
-    });
-    
-    if (!response.ok) {
-      throw new Error('Token verification failed');
+    try {
+      const response = await fetch(API_URLS.auth, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action: 'verify' }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Token verification failed');
+      }
+      
+      return response.json();
+    } catch (error) {
+      console.error('[API] Verify error:', error);
+      throw error;
     }
-    
-    return response.json();
   },
 
   async syncData(token: string, data: any): Promise<void> {
@@ -91,18 +96,22 @@ export const api = {
   },
 
   async getData(token: string): Promise<any> {
-    const response = await fetch(API_URLS.data, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to get data');
+    try {
+      const response = await fetch(API_URLS.data, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to get data');
+      }
+      
+      return response.json();
+    } catch (error) {
+      console.error('[API] getData error:', error);
+      throw error;
     }
-    
-    return response.json();
   },
 };
