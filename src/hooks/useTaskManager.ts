@@ -229,7 +229,7 @@ export const useTaskManager = (token: string) => {
   }, [token]);
 
   useEffect(() => {
-    const interval = setInterval(syncToCloud, 30000);
+    const interval = setInterval(syncToCloud, 300000);
     return () => clearInterval(interval);
   }, [syncToCloud]);
 
