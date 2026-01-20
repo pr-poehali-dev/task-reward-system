@@ -62,7 +62,7 @@ interface TaskViewsProps {
     rubles: number;
   };
   setManualRewards: (rewards: any) => void;
-  handleCreateTask: () => void;
+  handleCreateTask: (overrideSectionId?: string) => void;
   handleCompleteTask: (id: string) => void;
   handleDeleteTask: (id: string) => void;
   handleCreateCategory: () => void;

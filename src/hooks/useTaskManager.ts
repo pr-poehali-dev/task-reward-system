@@ -253,7 +253,7 @@ export const useTaskManager = (token: string) => {
     addActivityLog('Изменение темы', isDarkMode ? 'Включена светлая тема' : 'Включена тёмная тема');
   };
 
-  const handleCreateTask = () => {
+  const handleCreateTask = (overrideSectionId?: string) => {
     if (!newTask.title.trim()) {
       toast.error('Введите название задачи');
       return;
@@ -262,6 +262,7 @@ export const useTaskManager = (token: string) => {
     const task: Task = {
       id: Date.now().toString(),
       ...newTask,
+      sectionId: overrideSectionId !== undefined ? overrideSectionId : newTask.sectionId,
       completed: false,
       createdAt: new Date(),
       scheduledDate: selectedDate,

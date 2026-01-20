@@ -32,7 +32,7 @@ interface ProjectsViewProps {
     sectionId: string;
   };
   setNewTask: (task: any) => void;
-  handleCreateTask: () => void;
+  handleCreateTask: (overrideSectionId?: string) => void;
   handleCreateSection: () => void;
   handleDeleteSection: (id: string) => void;
   handleCompleteTask: (id: string) => void;
@@ -103,12 +103,9 @@ export const ProjectsView = (props: ProjectsViewProps) => {
   const handleCreateTaskInSection = (sectionId: string) => {
     if (!newTask.title.trim()) return;
 
-    setNewTask({ ...newTask, sectionId: sectionId === 'none' ? '' : sectionId });
-    
-    setTimeout(() => {
-      handleCreateTask();
-      setAddingToSection(null);
-    }, 0);
+    const finalSectionId = sectionId === 'none' ? '' : sectionId;
+    handleCreateTask(finalSectionId);
+    setAddingToSection(null);
   };
 
   if (sections.length === 0) {
