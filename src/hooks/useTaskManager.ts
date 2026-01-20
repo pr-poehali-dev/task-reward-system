@@ -127,6 +127,8 @@ export const useTaskManager = (token: string) => {
     rubles: 0,
   });
 
+  const [isSyncing, setIsSyncing] = useState(false);
+
   const selectedProject = projects.find(p => p.id === selectedProjectId);
 
   // Если проект не найден, выбираем первый доступный
@@ -170,6 +172,7 @@ export const useTaskManager = (token: string) => {
   }, [taskViewMode]);
 
   const syncToCloud = useCallback(async () => {
+    setIsSyncing(true);
     try {
       await api.syncData(token, {
         categories,
@@ -185,8 +188,12 @@ export const useTaskManager = (token: string) => {
           timestamp: log.timestamp.toISOString(),
         })),
       });
+      toast.success('Данные синхронизированы с облаком');
     } catch (error) {
       console.error('Sync error:', error);
+      toast.error('Ошибка синхронизации');
+    } finally {
+      setIsSyncing(false);
     }
   }, [token, categories, projects, tasks, earnedRewards, activityLog]);
 
@@ -228,10 +235,7 @@ export const useTaskManager = (token: string) => {
     loadCloudData();
   }, [token]);
 
-  useEffect(() => {
-    const interval = setInterval(syncToCloud, 300000);
-    return () => clearInterval(interval);
-  }, [syncToCloud]);
+
 
   const addActivityLog = (action: string, description: string) => {
     const log: ActivityLog = {
@@ -576,5 +580,6 @@ export const useTaskManager = (token: string) => {
     handleAddManualReward,
     getCategoryById,
     syncToCloud,
+    isSyncing,
   };
 };
