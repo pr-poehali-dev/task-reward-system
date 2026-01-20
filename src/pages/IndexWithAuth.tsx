@@ -11,16 +11,19 @@ const IndexWithAuth = () => {
 
   useEffect(() => {
     const verifyToken = async () => {
-      if (!token) {
+      const savedToken = localStorage.getItem('authToken');
+      
+      if (!savedToken) {
         setLoading(false);
         return;
       }
 
       try {
         console.log('[IndexWithAuth] Verifying token...');
-        const data = await api.verify(token);
+        const data = await api.verify(savedToken);
         console.log('[IndexWithAuth] Token verified:', data.user);
         setUser(data.user);
+        setToken(savedToken);
       } catch (error) {
         console.error('[IndexWithAuth] Token verification failed:', error);
         localStorage.removeItem('authToken');
