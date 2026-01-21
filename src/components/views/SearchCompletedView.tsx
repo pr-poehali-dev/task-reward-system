@@ -15,6 +15,7 @@ interface SearchCompletedViewProps {
   getCategoryById: (id: string) => Category | undefined;
   handleCompleteTask: (id: string) => void;
   handleDeleteTask: (id: string) => void;
+  handleUncompleteTask?: (id: string) => void;
 }
 
 export const SearchCompletedView = (props: SearchCompletedViewProps) => {
@@ -29,6 +30,7 @@ export const SearchCompletedView = (props: SearchCompletedViewProps) => {
     getCategoryById,
     handleCompleteTask,
     handleDeleteTask,
+    handleUncompleteTask,
   } = props;
 
   if (viewType === 'search') {
@@ -136,6 +138,7 @@ export const SearchCompletedView = (props: SearchCompletedViewProps) => {
                 getCategoryById={getCategoryById}
                 handleCompleteTask={handleCompleteTask}
                 handleDeleteTask={handleDeleteTask}
+                handleUncompleteTask={handleUncompleteTask}
               />
             ))
           )}

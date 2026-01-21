@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +15,32 @@ import Icon from '@/components/ui/icon';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { Task, Category, Project, Section, RewardType } from '@/types/task';
+
+interface SortableSectionProps {
+  section: Section;
+  children: React.ReactNode;
+}
+
+const SortableSection = ({ section, children }: SortableSectionProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: section.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
+};
 
 interface ProjectsViewProps {
   tasks: Task[];
@@ -38,12 +67,16 @@ interface ProjectsViewProps {
   handleCompleteTask: (id: string) => void;
   handleDeleteTask: (id: string) => void;
   getCategoryById: (id: string) => Category | undefined;
+  setProjects?: (projects: Project[]) => void;
+  setSelectedProjectId?: (id: string) => void;
 }
 
 export const ProjectsView = (props: ProjectsViewProps) => {
   const {
     tasks,
     categories,
+    projects,
+    selectedProjectId,
     selectedProject,
     isSectionDialogOpen,
     setIsSectionDialogOpen,
@@ -57,7 +90,40 @@ export const ProjectsView = (props: ProjectsViewProps) => {
     handleCompleteTask,
     handleDeleteTask,
     getCategoryById,
+    setProjects,
   } = props;
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = sections.findIndex(s => s.id === active.id);
+      const newIndex = sections.findIndex(s => s.id === over.id);
+      
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newSections = arrayMove(sections, oldIndex, newIndex).map((s, idx) => ({
+          ...s,
+          order: idx + 1
+        }));
+        
+        if (setProjects) {
+          const updatedProjects = projects.map(p => 
+            p.id === selectedProjectId 
+              ? { ...p, sections: newSections }
+              : p
+          );
+          setProjects(updatedProjects);
+        }
+      }
+    }
+  };
 
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -176,8 +242,9 @@ export const ProjectsView = (props: ProjectsViewProps) => {
         </Button>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-4">
-        {tasksWithoutSection.length > 0 && (
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {tasksWithoutSection.length > 0 && (
           <Card className="flex-shrink-0 w-80 p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Без раздела</h3>
@@ -187,7 +254,12 @@ export const ProjectsView = (props: ProjectsViewProps) => {
             <div className="space-y-2 mb-4">
               {tasksWithoutSection.map(task => (
                 <Card key={task.id} className="p-3 hover:shadow-md transition-all cursor-pointer" onClick={() => handleEditTask(task)}>
-                  <h4 className="font-medium mb-1">{task.title}</h4>
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className="font-medium">{task.title}</h4>
+                    <Badge variant="outline" className="text-xs">
+                      P{task.priority || 2}
+                    </Badge>
+                  </div>
                   {task.description && (
                     <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
                   )}
@@ -230,11 +302,14 @@ export const ProjectsView = (props: ProjectsViewProps) => {
           </Card>
         )}
 
-        {sections.map(section => {
-          const sectionTasks = activeTasks.filter(t => t.sectionId === section.id);
-          
-          return (
-            <Card key={section.id} className="flex-shrink-0 w-80 p-4">
+        <SortableContext items={sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+          <div className="flex gap-4">
+            {sections.sort((a, b) => (a.order || 0) - (b.order || 0)).map(section => {
+              const sectionTasks = activeTasks.filter(t => t.sectionId === section.id);
+              
+              return (
+                <SortableSection key={section.id} section={section}>
+                  <Card className="flex-shrink-0 w-80 p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold">{section.name}</h3>
                 <div className="flex items-center gap-2">
@@ -253,7 +328,12 @@ export const ProjectsView = (props: ProjectsViewProps) => {
               <div className="space-y-2 mb-4">
                 {sectionTasks.map(task => (
                   <Card key={task.id} className="p-3 hover:shadow-md transition-all cursor-pointer" onClick={() => handleEditTask(task)}>
-                    <h4 className="font-medium mb-1">{task.title}</h4>
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-medium">{task.title}</h4>
+                      <Badge variant="outline" className="text-xs">
+                        P{task.priority || 2}
+                      </Badge>
+                    </div>
                     {task.description && (
                       <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
                     )}
@@ -293,10 +373,14 @@ export const ProjectsView = (props: ProjectsViewProps) => {
                   Добавить задачу
                 </Button>
               )}
-            </Card>
-          );
-        })}
-      </div>
+                </Card>
+              </SortableSection>
+            );
+          })}
+          </div>
+        </SortableContext>
+        </div>
+      </DndContext>
 
       {/* Диалог создания раздела */}
       <Dialog open={isSectionDialogOpen} onOpenChange={setIsSectionDialogOpen}>
@@ -339,6 +423,23 @@ export const ProjectsView = (props: ProjectsViewProps) => {
                   value={editForm.description || ''}
                   onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                 />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Приоритет</label>
+                <Select
+                  value={String(editForm.priority || 2)}
+                  onValueChange={(value) => setEditForm({ ...editForm, priority: parseInt(value) as 1 | 2 | 3 | 4 })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 - Критичный</SelectItem>
+                    <SelectItem value="2">2 - Высокий</SelectItem>
+                    <SelectItem value="3">3 - Средний</SelectItem>
+                    <SelectItem value="4">4 - Низкий</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

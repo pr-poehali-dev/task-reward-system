@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import Icon from '@/components/ui/icon';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import type { Task, Category, ActivityLog, EarnedRewards } from '@/types/task';
+import type { Task, Category, ActivityLog, EarnedRewards, RewardType } from '@/types/task';
 import { ICONS_LIST, COLORS_LIST } from '@/types/task';
 
 interface CategoriesRewardsViewProps {
@@ -37,6 +37,7 @@ interface CategoriesRewardsViewProps {
   handleUpdateCategory: () => void;
   handleDeleteCategory: (id: string) => void;
   handleAddManualReward: () => void;
+  setEarnedRewards?: (rewards: EarnedRewards | ((prev: EarnedRewards) => EarnedRewards)) => void;
 }
 
 export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
@@ -182,31 +183,35 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
                 <DialogTitle>Добавить награды вручную</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Баллы</label>
-                  <Input
-                    type="number"
-                    value={manualRewards.points}
-                    onChange={(e) => setManualRewards({ ...manualRewards, points: parseInt(e.target.value) || 0 })}
-                  />
+                <div className="grid grid-cols-3 gap-3">
+                  {(['points', 'minutes', 'rubles'] as RewardType[]).map((type) => {
+                    const labels = { points: 'Баллы', minutes: 'Минуты', rubles: 'Рубли' };
+                    return (
+                      <Card key={type} className="p-4 text-center cursor-pointer hover:shadow-md transition-all">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="text-2xl font-bold text-foreground">{earnedRewards[type]}</div>
+                          <div className="text-xs text-muted-foreground">{labels[type]}</div>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => props.setEarnedRewards?.((prev: EarnedRewards) => ({ ...prev, [type]: Math.max(0, prev[type] - 1) }))}
+                            >
+                              <Icon name="Minus" size={14} />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => props.setEarnedRewards?.((prev: EarnedRewards) => ({ ...prev, [type]: prev[type] + 1 }))}
+                            >
+                              <Icon name="Plus" size={14} />
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    );
+                  })}
                 </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Минуты</label>
-                  <Input
-                    type="number"
-                    value={manualRewards.minutes}
-                    onChange={(e) => setManualRewards({ ...manualRewards, minutes: parseInt(e.target.value) || 0 })}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Рубли</label>
-                  <Input
-                    type="number"
-                    value={manualRewards.rubles}
-                    onChange={(e) => setManualRewards({ ...manualRewards, rubles: parseInt(e.target.value) || 0 })}
-                  />
-                </div>
-                <Button onClick={handleAddManualReward} className="w-full">Добавить</Button>
               </div>
             </DialogContent>
           </Dialog>

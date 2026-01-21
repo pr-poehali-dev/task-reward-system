@@ -12,6 +12,7 @@ export const useTaskManager = (token: string) => {
         ...t,
         createdAt: new Date(t.createdAt),
         scheduledDate: t.scheduledDate ? new Date(t.scheduledDate) : undefined,
+        priority: t.priority || 2,
       }));
     }
     return [];
@@ -32,10 +33,12 @@ export const useTaskManager = (token: string) => {
     const saved = localStorage.getItem('projects');
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Миграция: добавляем sections если его нет
       return parsed.map((p: any) => ({
         ...p,
-        sections: p.sections || []
+        sections: (p.sections || []).map((s: any, idx: number) => ({
+          ...s,
+          order: s.order !== undefined ? s.order : idx + 1
+        }))
       }));
     }
     return [
@@ -100,6 +103,7 @@ export const useTaskManager = (token: string) => {
     rewardType: 'minutes' as RewardType,
     rewardAmount: 10,
     sectionId: '',
+    priority: 2 as 1 | 2 | 3 | 4,
   });
 
   const [newCategory, setNewCategory] = useState({
@@ -204,10 +208,12 @@ export const useTaskManager = (token: string) => {
         console.log('Loaded cloud data:', data);
         
         if (data.projects && data.projects.length > 0) {
-          // Миграция: добавляем sections если его нет
           const migratedProjects = data.projects.map((p: any) => ({
             ...p,
-            sections: p.sections || []
+            sections: (p.sections || []).map((s: any, idx: number) => ({
+              ...s,
+              order: s.order !== undefined ? s.order : idx + 1
+            }))
           }));
           setProjects(migratedProjects);
         }
@@ -221,6 +227,7 @@ export const useTaskManager = (token: string) => {
             ...t,
             createdAt: new Date(t.created_at),
             scheduledDate: t.scheduled_date ? new Date(t.scheduled_date) : undefined,
+            priority: t.priority || 2,
           }));
           setTasks(parsedTasks);
         }
@@ -278,6 +285,7 @@ export const useTaskManager = (token: string) => {
       rewardType: 'minutes',
       rewardAmount: 10,
       sectionId: '',
+      priority: 2 as 1 | 2 | 3 | 4,
     });
     setSelectedDate(new Date());
     toast.success('Задача создана!');
@@ -303,6 +311,28 @@ export const useTaskManager = (token: string) => {
         addActivityLog('Выполнение задачи', `Задача "${t.title}" выполнена. Получено: +${t.rewardAmount} ${rewardText}`);
         
         return { ...t, completed: true };
+      }
+      return t;
+    }));
+  };
+
+  const handleUncompleteTask = (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task || !task.completed) return;
+
+    setTasks(tasks.map(t => {
+      if (t.id === taskId) {
+        const rewardText = t.rewardType === 'points' ? 'баллов' : t.rewardType === 'minutes' ? 'минут' : 'рублей';
+        
+        setEarnedRewards(prev => ({
+          ...prev,
+          [t.rewardType]: Math.max(0, prev[t.rewardType] - t.rewardAmount),
+        }));
+        
+        addActivityLog('Возврат задачи', `Задача "${t.title}" возвращена в активные. Списано: -${t.rewardAmount} ${rewardText}`);
+        toast.info(`Задача возвращена в активные`, { description: t.title });
+        
+        return { ...t, completed: false };
       }
       return t;
     }));
@@ -452,10 +482,14 @@ export const useTaskManager = (token: string) => {
       return;
     }
 
+    const project = projects.find(p => p.id === selectedProjectId);
+    const maxOrder = project?.sections?.reduce((max, s) => Math.max(max, s.order || 0), 0) || 0;
+
     const section: Section = {
       id: Date.now().toString(),
       name: newSection.name,
       projectId: selectedProjectId,
+      order: maxOrder + 1,
     };
 
     setProjects(projects.map(proj => 
@@ -579,8 +613,11 @@ export const useTaskManager = (token: string) => {
     handleCreateSection,
     handleDeleteSection,
     handleAddManualReward,
+    handleUncompleteTask,
     getCategoryById,
     syncToCloud,
     isSyncing,
+    setEarnedRewards,
+    setProjects,
   };
 };

@@ -156,8 +156,11 @@ const Index = ({ user, token, onLogout }: IndexProps) => {
             handleCreateSection={manager.handleCreateSection}
             handleDeleteSection={manager.handleDeleteSection}
             handleAddManualReward={manager.handleAddManualReward}
+            handleUncompleteTask={manager.handleUncompleteTask}
             getCategoryById={manager.getCategoryById}
             setSidebarView={manager.setSidebarView}
+            setEarnedRewards={manager.setEarnedRewards}
+            setProjects={manager.setProjects}
           />
         </div>
       </div>

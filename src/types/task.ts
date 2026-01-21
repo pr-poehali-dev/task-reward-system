@@ -21,6 +21,7 @@ export interface Section {
   id: string;
   name: string;
   projectId: string;
+  order: number;
 }
 
 export interface Task {
@@ -35,6 +36,7 @@ export interface Task {
   scheduledDate?: Date;
   projectId: string;
   sectionId?: string;
+  priority: 1 | 2 | 3 | 4;
 }
 
 export interface ActivityLog {

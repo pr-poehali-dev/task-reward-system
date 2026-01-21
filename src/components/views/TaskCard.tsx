@@ -13,6 +13,7 @@ interface TaskCardProps {
   getCategoryById: (id: string) => Category | undefined;
   handleCompleteTask: (id: string) => void;
   handleDeleteTask: (id: string) => void;
+  handleUncompleteTask?: (id: string) => void;
 }
 
 export const TaskCard = ({
@@ -22,6 +23,7 @@ export const TaskCard = ({
   getCategoryById,
   handleCompleteTask,
   handleDeleteTask,
+  handleUncompleteTask,
 }: TaskCardProps) => {
   const category = getCategoryById(task.category);
   const project = projects.find(p => p.id === task.projectId);
@@ -75,6 +77,16 @@ export const TaskCard = ({
               className="gap-1"
             >
               <Icon name="Check" size={16} />
+            </Button>
+          ) : handleUncompleteTask ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleUncompleteTask(task.id)}
+              className="gap-1"
+            >
+              <Icon name="RotateCcw" size={16} />
+              Вернуть
             </Button>
           ) : (
             <Badge variant="secondary" className="gap-1">
