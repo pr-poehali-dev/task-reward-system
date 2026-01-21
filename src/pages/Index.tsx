@@ -49,20 +49,25 @@ const Index = ({ user, token, onLogout }: IndexProps) => {
             </div>
             <div className="flex gap-2 items-center">
               <span className="text-sm text-muted-foreground mr-2">{user.username}</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={manager.syncToCloud}
-                disabled={manager.isSyncing}
-                className="gap-2"
-              >
-                <Icon 
-                  name="Cloud" 
-                  size={16} 
-                  className={manager.isSyncing ? 'animate-pulse' : ''}
-                />
-                {manager.isSyncing && <span className="text-xs">Синхронизация...</span>}
-              </Button>
+              <div className="relative">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={manager.syncToCloud}
+                  disabled={manager.isSyncing}
+                  className="gap-2"
+                >
+                  <Icon 
+                    name="Cloud" 
+                    size={16} 
+                    className={manager.isSyncing ? 'animate-pulse' : ''}
+                  />
+                  {manager.isSyncing && <span className="text-xs">Синхронизация...</span>}
+                </Button>
+                {manager.hasUnsyncedChanges && !manager.isSyncing && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-background animate-pulse" />
+                )}
+              </div>
               <Button
                 variant="outline"
                 size="sm"

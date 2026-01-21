@@ -132,6 +132,12 @@ export const useTaskManager = (token: string) => {
   });
 
   const [isSyncing, setIsSyncing] = useState(false);
+  const [hasUnsyncedChanges, setHasUnsyncedChanges] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(() => {
+    const saved = localStorage.getItem('lastSyncTime');
+    return saved ? new Date(saved) : null;
+  });
 
   const selectedProject = projects.find(p => p.id === selectedProjectId);
 
@@ -153,23 +159,38 @@ export const useTaskManager = (token: string) => {
 
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
-  }, [tasks]);
+    if (!isInitialLoad) {
+      setHasUnsyncedChanges(true);
+    }
+  }, [tasks, isInitialLoad]);
 
   useEffect(() => {
     localStorage.setItem('categories', JSON.stringify(categories));
-  }, [categories]);
+    if (!isInitialLoad) {
+      setHasUnsyncedChanges(true);
+    }
+  }, [categories, isInitialLoad]);
 
   useEffect(() => {
     localStorage.setItem('projects', JSON.stringify(projects));
-  }, [projects]);
+    if (!isInitialLoad) {
+      setHasUnsyncedChanges(true);
+    }
+  }, [projects, isInitialLoad]);
 
   useEffect(() => {
     localStorage.setItem('activityLog', JSON.stringify(activityLog));
-  }, [activityLog]);
+    if (!isInitialLoad) {
+      setHasUnsyncedChanges(true);
+    }
+  }, [activityLog, isInitialLoad]);
 
   useEffect(() => {
     localStorage.setItem('earnedRewards', JSON.stringify(earnedRewards));
-  }, [earnedRewards]);
+    if (!isInitialLoad) {
+      setHasUnsyncedChanges(true);
+    }
+  }, [earnedRewards, isInitialLoad]);
 
   useEffect(() => {
     localStorage.setItem('taskViewMode', JSON.stringify(taskViewMode));
@@ -192,6 +213,10 @@ export const useTaskManager = (token: string) => {
           timestamp: log.timestamp.toISOString(),
         })),
       });
+      const syncTime = new Date();
+      setLastSyncTime(syncTime);
+      setHasUnsyncedChanges(false);
+      localStorage.setItem('lastSyncTime', syncTime.toISOString());
       toast.success('Данные синхронизированы с облаком');
     } catch (error) {
       console.error('Sync error:', error);
@@ -206,6 +231,7 @@ export const useTaskManager = (token: string) => {
       try {
         const data = await api.getData(token);
         console.log('Loaded cloud data:', data);
+        setIsInitialLoad(false);
         
         if (data.projects && data.projects.length > 0) {
           const migratedProjects = data.projects.map((p: any) => ({
@@ -617,6 +643,8 @@ export const useTaskManager = (token: string) => {
     getCategoryById,
     syncToCloud,
     isSyncing,
+    hasUnsyncedChanges,
+    lastSyncTime,
     setEarnedRewards,
     setProjects,
   };
