@@ -163,6 +163,7 @@ export const ProjectsView = (props: ProjectsViewProps) => {
   };
 
   const handleAddTask = (sectionId: string) => {
+    setNewTask({ ...newTask, title: '', description: '' });
     setAddingToSection(sectionId);
   };
 
