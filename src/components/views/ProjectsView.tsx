@@ -289,7 +289,7 @@ export const ProjectsView = (props: ProjectsViewProps) => {
                   className="mb-2"
                 />
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={() => handleCreateTaskInSection('none')}>Создать</Button>
+                  <Button size="sm" onClick={() => handleCreateTaskInSection('none')} disabled={!newTask.title.trim()}>Создать</Button>
                   <Button size="sm" variant="outline" onClick={() => setAddingToSection(null)}>Отмена</Button>
                 </div>
               </Card>
@@ -363,7 +363,7 @@ export const ProjectsView = (props: ProjectsViewProps) => {
                     className="mb-2"
                   />
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={() => handleCreateTaskInSection(section.id)}>Создать</Button>
+                    <Button size="sm" onClick={() => handleCreateTaskInSection(section.id)} disabled={!newTask.title.trim()}>Создать</Button>
                     <Button size="sm" variant="outline" onClick={() => setAddingToSection(null)}>Отмена</Button>
                   </div>
                 </Card>
