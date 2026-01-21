@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, useDroppable } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Card } from '@/components/ui/card';
@@ -45,6 +45,80 @@ const SortableSection = ({ section, children }: SortableSectionProps) => {
   );
 };
 
+interface DroppableAreaProps {
+  id: string;
+  children: React.ReactNode;
+}
+
+const DroppableArea = ({ id, children }: DroppableAreaProps) => {
+  const { setNodeRef } = useDroppable({ id });
+  return <div ref={setNodeRef}>{children}</div>;
+};
+
+interface SortableTaskProps {
+  task: Task;
+  onEdit: (task: Task) => void;
+  onComplete: (id: string) => void;
+  onDelete: (id: string) => void;
+}
+
+const SortableTask = ({ task, onEdit, onComplete, onDelete }: SortableTaskProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <Card 
+      ref={setNodeRef} 
+      style={style} 
+      {...attributes}
+      className="p-3 hover:shadow-md transition-all cursor-pointer"
+      onClick={() => onEdit(task)}
+    >
+      <div className="flex items-center gap-2">
+        <div {...listeners} className="cursor-grab active:cursor-grabbing">
+          <Icon name="GripVertical" size={14} className="text-muted-foreground" />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="font-medium">{task.title}</h4>
+            <Badge variant="outline" className="text-xs">
+              P{task.priority || 2}
+            </Badge>
+          </div>
+          {task.description && (
+            <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
+          )}
+          <div className="flex items-center justify-between">
+            <Badge variant="secondary" className="text-xs">
+              {task.rewardType === 'points' ? '⭐' : task.rewardType === 'minutes' ? '⏱️' : '💰'} {task.rewardAmount}
+            </Badge>
+            <div className="flex gap-1">
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); onComplete(task.id); }}>
+                <Icon name="Check" size={14} />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}>
+                <Icon name="Trash2" size={14} />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+};
+
 interface ProjectsViewProps {
   tasks: Task[];
   categories: Category[];
@@ -72,9 +146,10 @@ interface ProjectsViewProps {
   getCategoryById: (id: string) => Category | undefined;
   setProjects?: (projects: Project[]) => void;
   setSelectedProjectId?: (id: string) => void;
+  setTasks: (tasks: Task[]) => void;
 }
 
-export const ProjectsView = (props: ProjectsViewProps) => {
+const ProjectsView = (props: ProjectsViewProps) => {
   const {
     tasks,
     categories,
@@ -94,6 +169,7 @@ export const ProjectsView = (props: ProjectsViewProps) => {
     handleDeleteTask,
     getCategoryById,
     setProjects,
+    setTasks,
   } = props;
 
   const sensors = useSensors(
@@ -103,36 +179,72 @@ export const ProjectsView = (props: ProjectsViewProps) => {
     })
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editForm, setEditForm] = useState<Partial<Task>>({});
+  const [addingToSection, setAddingToSection] = useState<string | null>(null);
 
-    if (over && active.id !== over.id) {
-      const oldIndex = sections.findIndex(s => s.id === active.id);
-      const newIndex = sections.findIndex(s => s.id === over.id);
-      
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newSections = arrayMove(sections, oldIndex, newIndex).map((s, idx) => ({
-          ...s,
-          order: idx + 1
-        }));
-        
-        if (setProjects) {
-          const updatedProjects = projects.map(p => 
-            p.id === selectedProjectId 
-              ? { ...p, sections: newSections }
-              : p
-          );
-          setProjects(updatedProjects);
-        }
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const task = tasks.find(t => t.id === active.id);
+    if (task) setActiveTask(task);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeTask = tasks.find(t => t.id === active.id);
+    if (!activeTask) return;
+
+    const overTask = tasks.find(t => t.id === over.id);
+    const overSection = over.id;
+
+    if (overTask && activeTask.sectionId !== overTask.sectionId) {
+      const updatedTasks = tasks.map(t =>
+        t.id === activeTask.id ? { ...t, sectionId: overTask.sectionId } : t
+      );
+      setTasks(updatedTasks);
+    } else if (typeof overSection === 'string' && overSection.startsWith('droppable-')) {
+      const newSectionId = overSection.replace('droppable-', '');
+      if (activeTask.sectionId !== newSectionId) {
+        const updatedTasks = tasks.map(t =>
+          t.id === activeTask.id ? { ...t, sectionId: newSectionId === 'none' ? '' : newSectionId } : t
+        );
+        setTasks(updatedTasks);
       }
     }
   };
 
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editForm, setEditForm] = useState<Partial<Task>>({});
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveTask(null);
 
-  const [addingToSection, setAddingToSection] = useState<string | null>(null);
+    if (!over) return;
+
+    const activeSection = sections.find(s => s.id === active.id);
+    const overSection = sections.find(s => s.id === over.id);
+
+    if (activeSection && overSection && active.id !== over.id) {
+      const oldIndex = sections.findIndex(s => s.id === active.id);
+      const newIndex = sections.findIndex(s => s.id === over.id);
+      
+      const newSections = arrayMove(sections, oldIndex, newIndex).map((s, idx) => ({
+        ...s,
+        order: idx + 1
+      }));
+      
+      if (setProjects) {
+        const updatedProjects = projects.map(p => 
+          p.id === selectedProjectId 
+            ? { ...p, sections: newSections }
+            : p
+        );
+        setProjects(updatedProjects);
+      }
+    }
+  };
 
   if (!selectedProject) {
     return (
@@ -246,7 +358,13 @@ export const ProjectsView = (props: ProjectsViewProps) => {
         </Button>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext 
+        sensors={sensors} 
+        collisionDetection={closestCenter} 
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+      >
         <div className="flex gap-4 overflow-x-auto pb-4">
           {tasksWithoutSection.length > 0 && (
           <Card className="flex-shrink-0 w-80 p-4">
@@ -255,34 +373,21 @@ export const ProjectsView = (props: ProjectsViewProps) => {
               <Badge variant="outline">{tasksWithoutSection.length}</Badge>
             </div>
             
-            <div className="space-y-2 mb-4">
-              {tasksWithoutSection.map(task => (
-                <Card key={task.id} className="p-3 hover:shadow-md transition-all cursor-pointer" onClick={() => handleEditTask(task)}>
-                  <div className="flex items-center justify-between mb-1">
-                    <h4 className="font-medium">{task.title}</h4>
-                    <Badge variant="outline" className="text-xs">
-                      P{task.priority || 2}
-                    </Badge>
-                  </div>
-                  {task.description && (
-                    <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
-                  )}
-                  <div className="flex items-center justify-between">
-                    <Badge variant="secondary" className="text-xs">
-                      {task.rewardType === 'points' ? '⭐' : task.rewardType === 'minutes' ? '⏱️' : '💰'} {task.rewardAmount}
-                    </Badge>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); handleCompleteTask(task.id); }}>
-                        <Icon name="Check" size={14} />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}>
-                        <Icon name="Trash2" size={14} />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
+            <DroppableArea id="droppable-none">
+              <SortableContext items={tasksWithoutSection.map(t => t.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2 mb-4">
+                {tasksWithoutSection.map(task => (
+                  <SortableTask
+                    key={task.id}
+                    task={task}
+                    onEdit={handleEditTask}
+                    onComplete={handleCompleteTask}
+                    onDelete={handleDeleteTask}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+            </DroppableArea>
 
             {addingToSection === 'none' ? (
               <Card className="p-3 border-dashed">
@@ -329,34 +434,21 @@ export const ProjectsView = (props: ProjectsViewProps) => {
                 </div>
               </div>
               
-              <div className="space-y-2 mb-4">
-                {sectionTasks.map(task => (
-                  <Card key={task.id} className="p-3 hover:shadow-md transition-all cursor-pointer" onClick={() => handleEditTask(task)}>
-                    <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-medium">{task.title}</h4>
-                      <Badge variant="outline" className="text-xs">
-                        P{task.priority || 2}
-                      </Badge>
-                    </div>
-                    {task.description && (
-                      <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <Badge variant="secondary" className="text-xs">
-                        {task.rewardType === 'points' ? '⭐' : task.rewardType === 'minutes' ? '⏱️' : '💰'} {task.rewardAmount}
-                      </Badge>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); handleCompleteTask(task.id); }}>
-                          <Icon name="Check" size={14} />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}>
-                          <Icon name="Trash2" size={14} />
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+              <DroppableArea id={`droppable-${section.id}`}>
+                <SortableContext items={sectionTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-2 mb-4">
+                    {sectionTasks.map(task => (
+                      <SortableTask
+                        key={task.id}
+                        task={task}
+                        onEdit={handleEditTask}
+                        onComplete={handleCompleteTask}
+                        onDelete={handleDeleteTask}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DroppableArea>
 
               {addingToSection === section.id ? (
                 <Card className="p-3 border-dashed">

@@ -166,6 +166,7 @@ const Index = ({ user, token, onLogout }: IndexProps) => {
             setSidebarView={manager.setSidebarView}
             setEarnedRewards={manager.setEarnedRewards}
             setProjects={manager.setProjects}
+            setTasks={manager.setTasks}
           />
         </div>
       </div>

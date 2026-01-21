@@ -81,6 +81,7 @@ interface TaskViewsProps {
   setSidebarView: (view: SidebarView) => void;
   setEarnedRewards?: (rewards: EarnedRewards | ((prev: EarnedRewards) => EarnedRewards)) => void;
   setProjects?: (projects: Project[]) => void;
+  setTasks: (tasks: Task[]) => void;
 }
 
 export const TaskViews = (props: TaskViewsProps) => {
@@ -108,6 +109,7 @@ export const TaskViews = (props: TaskViewsProps) => {
         handleDeleteTask={props.handleDeleteTask}
         getCategoryById={props.getCategoryById}
         setProjects={props.setProjects}
+        setTasks={props.setTasks}
       />
     );
   }

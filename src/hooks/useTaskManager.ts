@@ -647,5 +647,6 @@ export const useTaskManager = (token: string) => {
     lastSyncTime,
     setEarnedRewards,
     setProjects,
+    setTasks,
   };
 };
