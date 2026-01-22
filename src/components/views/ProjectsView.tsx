@@ -408,25 +408,28 @@ const ProjectsView = (props: ProjectsViewProps) => {
               
               return (
                 <SortableSection key={section.id} section={section}>
-                  <SectionCard
-                    section={section}
-                    sectionTasks={sectionTasks}
-                    categories={categories}
-                    projects={projects}
-                    currentProjectId={selectedProjectId}
-                    isOver={overSectionId === section.id}
-                    addingToSection={addingToSection}
-                    newTask={newTask}
-                    onDeleteSection={handleDeleteSection}
-                    onEditTask={handleEditTask}
-                    onCompleteTask={handleCompleteTask}
-                    onDeleteTask={handleDeleteTask}
-                    onAddTask={handleAddTask}
-                    onCancelAdd={() => setAddingToSection(null)}
-                    onNewTaskChange={(field, value) => setNewTask({ ...newTask, [field]: value })}
-                    onCreateTask={handleCreateTaskInSection}
-                    onMoveSection={handleMoveSection}
-                  />
+                  {({ dragHandleProps }) => (
+                    <SectionCard
+                      section={section}
+                      sectionTasks={sectionTasks}
+                      categories={categories}
+                      projects={projects}
+                      currentProjectId={selectedProjectId}
+                      isOver={overSectionId === section.id}
+                      addingToSection={addingToSection}
+                      dragHandleProps={dragHandleProps}
+                      newTask={newTask}
+                      onDeleteSection={handleDeleteSection}
+                      onEditTask={handleEditTask}
+                      onCompleteTask={handleCompleteTask}
+                      onDeleteTask={handleDeleteTask}
+                      onAddTask={handleAddTask}
+                      onCancelAdd={() => setAddingToSection(null)}
+                      onNewTaskChange={(field, value) => setNewTask({ ...newTask, [field]: value })}
+                      onCreateTask={handleCreateTaskInSection}
+                      onMoveSection={handleMoveSection}
+                    />
+                  )}
                 </SortableSection>
               );
             })}

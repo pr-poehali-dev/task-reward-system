@@ -7,9 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import type { Task, Section } from '@/types/task';
 
+interface SortableSectionRenderProps {
+  dragHandleProps: any;
+}
+
 interface SortableSectionProps {
   section: Section;
-  children: React.ReactNode;
+  children: (props: SortableSectionRenderProps) => React.ReactNode;
 }
 
 export const SortableSection = ({ section, children }: SortableSectionProps) => {
@@ -28,15 +32,18 @@ export const SortableSection = ({ section, children }: SortableSectionProps) => 
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const dragHandleProps = {
+    ...attributes,
+    ...listeners,
+  };
+
   return (
     <div 
       ref={setNodeRef} 
       style={style} 
       className="section-transition"
-      {...attributes} 
-      {...listeners}
     >
-      {children}
+      {children({ dragHandleProps })}
     </div>
   );
 };

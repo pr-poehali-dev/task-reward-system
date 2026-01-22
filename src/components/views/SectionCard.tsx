@@ -18,6 +18,7 @@ interface SectionCardProps {
   currentProjectId: string;
   isOver?: boolean;
   addingToSection: string | null;
+  dragHandleProps?: any;
   newTask: {
     title: string;
     description: string;
@@ -45,6 +46,7 @@ const SectionCard = ({
   currentProjectId,
   isOver,
   addingToSection,
+  dragHandleProps,
   newTask,
   onDeleteSection,
   onEditTask,
@@ -60,7 +62,16 @@ const SectionCard = ({
   return (
     <Card className={`flex-shrink-0 w-80 p-4 flex flex-col section-card-content transition-all ${isOver ? 'ring-2 ring-primary shadow-lg scale-105' : ''}`} style={{ maxHeight: 'calc(100vh - 200px)' }}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold">{section.name}</h3>
+        <div className="flex items-center gap-2 flex-1">
+          <div 
+            {...dragHandleProps}
+            className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted/50 rounded transition-colors"
+            title="Перетащить раздел"
+          >
+            <Icon name="GripVertical" size={16} className="text-muted-foreground" />
+          </div>
+          <h3 className="font-semibold">{section.name}</h3>
+        </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline">{sectionTasks.length}</Badge>
           {otherProjects.length > 0 && (
