@@ -74,7 +74,7 @@ export const SortableTask = ({ task, onEdit, onComplete, onDelete }: SortableTas
       ref={setNodeRef} 
       style={style} 
       {...attributes}
-      className="p-3 hover:shadow-md transition-all cursor-pointer"
+      className="p-3 hover:shadow-md transition-all cursor-pointer task-card"
       onClick={() => onEdit(task)}
     >
       <div className="flex items-center gap-2">

@@ -86,6 +86,9 @@ const ProjectsView = (props: ProjectsViewProps) => {
   const [scrollLeft, setScrollLeft] = useState(0);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('.task-card, .section-card-content')) return;
+    
     const container = scrollContainerRef.current;
     if (!container) return;
     
@@ -93,6 +96,7 @@ const ProjectsView = (props: ProjectsViewProps) => {
     setStartX(e.pageX - container.offsetLeft);
     setScrollLeft(container.scrollLeft);
     container.style.cursor = 'grabbing';
+    container.style.userSelect = 'none';
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -111,6 +115,7 @@ const ProjectsView = (props: ProjectsViewProps) => {
     setIsDragging(false);
     if (scrollContainerRef.current) {
       scrollContainerRef.current.style.cursor = 'grab';
+      scrollContainerRef.current.style.userSelect = 'auto';
     }
   };
 

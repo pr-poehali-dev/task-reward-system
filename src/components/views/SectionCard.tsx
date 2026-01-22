@@ -48,7 +48,7 @@ const SectionCard = ({
   onCreateTask,
 }: SectionCardProps) => {
   return (
-    <Card className="flex-shrink-0 w-80 p-4">
+    <Card className="flex-shrink-0 w-80 p-4 flex flex-col section-card-content" style={{ maxHeight: 'calc(100vh - 200px)' }}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold">{section.name}</h3>
         <div className="flex items-center gap-2">
@@ -65,7 +65,7 @@ const SectionCard = ({
       </div>
 
       <DroppableArea id={`droppable-${section.id}`}>
-        <div className="space-y-2 min-h-[100px]">
+        <div className="space-y-2 min-h-[100px] overflow-y-auto pr-2" style={{ maxHeight: 'calc(100vh - 350px)' }}>
           <SortableContext items={sectionTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
             {sectionTasks.map(task => (
               <SortableTask
