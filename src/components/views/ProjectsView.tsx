@@ -193,6 +193,34 @@ const ProjectsView = (props: ProjectsViewProps) => {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     
+    if (!over) {
+      setActiveTask(null);
+      setActiveSection(null);
+      setOverSectionId(null);
+      return;
+    }
+
+    // Перемещение задач внутри одного раздела
+    if (activeTask && active.id !== over.id) {
+      const activeTaskData = tasks.find(t => t.id === active.id);
+      const overTask = tasks.find(t => t.id === over.id);
+      
+      if (activeTaskData && overTask && activeTaskData.sectionId === overTask.sectionId) {
+        const sectionTasks = tasks.filter(t => t.sectionId === activeTaskData.sectionId && t.projectId === selectedProjectId && !t.completed);
+        const activeIndex = sectionTasks.findIndex(t => t.id === active.id);
+        const overIndex = sectionTasks.findIndex(t => t.id === over.id);
+        
+        if (activeIndex !== -1 && overIndex !== -1) {
+          const reorderedTasks = arrayMove(sectionTasks, activeIndex, overIndex);
+          const otherTasks = tasks.filter(t => 
+            t.sectionId !== activeTaskData.sectionId || t.projectId !== selectedProjectId || t.completed
+          );
+          setTasks([...otherTasks, ...reorderedTasks]);
+        }
+      }
+    }
+    
+    // Перемещение разделов
     if (activeSection && over && setProjects && active.id !== over.id) {
       const overId = over.id as string;
       let targetSectionId = overId;
