@@ -80,6 +80,7 @@ const ProjectsView = (props: ProjectsViewProps) => {
 
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [activeSection, setActiveSection] = useState<Section | null>(null);
+  const [overSectionId, setOverSectionId] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Task>>({});
@@ -141,7 +142,10 @@ const ProjectsView = (props: ProjectsViewProps) => {
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-    if (!over) return;
+    if (!over) {
+      setOverSectionId(null);
+      return;
+    }
 
     const activeTask = tasks.find(t => t.id === active.id);
     if (activeTask) {
@@ -161,6 +165,27 @@ const ProjectsView = (props: ProjectsViewProps) => {
           );
           setTasks(updatedTasks);
         }
+      }
+    }
+
+    if (activeSection && over) {
+      const overId = over.id as string;
+      let targetSectionId = overId;
+      
+      if (overId.startsWith('droppable-')) {
+        targetSectionId = overId.replace('droppable-', '');
+      }
+      
+      const overTask = tasks.find(t => t.id === overId);
+      if (overTask && overTask.sectionId) {
+        targetSectionId = overTask.sectionId;
+      }
+      
+      const targetSection = sections.find(s => s.id === targetSectionId);
+      if (targetSection && targetSection.id !== activeSection.id) {
+        setOverSectionId(targetSection.id);
+      } else {
+        setOverSectionId(null);
       }
     }
   };
@@ -199,6 +224,7 @@ const ProjectsView = (props: ProjectsViewProps) => {
     
     setActiveTask(null);
     setActiveSection(null);
+    setOverSectionId(null);
   };
 
   const handleEditTask = (task: Task) => {
@@ -388,6 +414,7 @@ const ProjectsView = (props: ProjectsViewProps) => {
                     categories={categories}
                     projects={projects}
                     currentProjectId={selectedProjectId}
+                    isOver={overSectionId === section.id}
                     addingToSection={addingToSection}
                     newTask={newTask}
                     onDeleteSection={handleDeleteSection}

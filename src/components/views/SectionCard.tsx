@@ -16,6 +16,7 @@ interface SectionCardProps {
   categories: Category[];
   projects: Project[];
   currentProjectId: string;
+  isOver?: boolean;
   addingToSection: string | null;
   newTask: {
     title: string;
@@ -42,6 +43,7 @@ const SectionCard = ({
   categories,
   projects,
   currentProjectId,
+  isOver,
   addingToSection,
   newTask,
   onDeleteSection,
@@ -56,7 +58,7 @@ const SectionCard = ({
 }: SectionCardProps) => {
   const otherProjects = projects.filter(p => p.id !== currentProjectId);
   return (
-    <Card className="flex-shrink-0 w-80 p-4 flex flex-col section-card-content" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+    <Card className={`flex-shrink-0 w-80 p-4 flex flex-col section-card-content transition-all ${isOver ? 'ring-2 ring-primary shadow-lg scale-105' : ''}`} style={{ maxHeight: 'calc(100vh - 200px)' }}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold">{section.name}</h3>
         <div className="flex items-center gap-2">
