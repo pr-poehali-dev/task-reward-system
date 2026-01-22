@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
-import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -88,7 +88,7 @@ const ProjectsView = (props: ProjectsViewProps) => {
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
-    if (target.closest('.task-card, .section-card-content')) return;
+    if (target.closest('.task-card, .section-card-content, .section-drag-handle')) return;
     
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -162,49 +162,20 @@ const ProjectsView = (props: ProjectsViewProps) => {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     
-    if (activeSection && over) {
+    if (activeSection && over && setProjects) {
       const activeIndex = sections.findIndex(s => s.id === active.id);
       const overIndex = sections.findIndex(s => s.id === over.id);
       
       if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
-        const reorderedSections = [...sections];
-        const [movedSection] = reorderedSections.splice(activeIndex, 1);
-        reorderedSections.splice(overIndex, 0, movedSection);
-        
+        const reorderedSections = arrayMove(sections, activeIndex, overIndex);
         const updatedSections = reorderedSections.map((s, idx) => ({ ...s, order: idx }));
         
-        if (setProjects) {
-          const updatedProjects = projects.map(p => 
-            p.id === selectedProjectId 
-              ? { ...p, sections: updatedSections }
-              : p
-          );
-          setProjects(updatedProjects);
-        }
-      }
-      
-      if (typeof over.id === 'string' && over.id.startsWith('project-')) {
-        const targetProjectId = over.id.replace('project-', '');
-        if (targetProjectId !== activeSection.projectId && setProjects) {
-          const updatedProjects = projects.map(p => {
-            if (p.id === activeSection.projectId) {
-              return { ...p, sections: p.sections.filter(s => s.id !== activeSection.id) };
-            }
-            if (p.id === targetProjectId) {
-              return { 
-                ...p, 
-                sections: [...p.sections, { ...activeSection, projectId: targetProjectId }] 
-              };
-            }
-            return p;
-          });
-          setProjects(updatedProjects);
-          
-          const updatedTasks = tasks.map(t =>
-            t.sectionId === activeSection.id ? { ...t, projectId: targetProjectId } : t
-          );
-          setTasks(updatedTasks);
-        }
+        const updatedProjects = projects.map(p => 
+          p.id === selectedProjectId 
+            ? { ...p, sections: updatedSections }
+            : p
+        );
+        setProjects(updatedProjects);
       }
     }
     
@@ -352,7 +323,7 @@ const ProjectsView = (props: ProjectsViewProps) => {
           </Card>
         )}
 
-        <SortableContext items={sections.map(s => s.id)}>
+        <SortableContext items={sections.map(s => s.id)} strategy={horizontalListSortingStrategy}>
           <div 
             ref={scrollContainerRef}
             className="flex gap-4 overflow-x-auto pb-4 cursor-grab"

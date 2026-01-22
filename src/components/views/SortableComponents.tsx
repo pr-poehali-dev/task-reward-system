@@ -27,8 +27,8 @@ export const SortableSection = ({ section, children }: SortableSectionProps) => 
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes}>
-      <div {...listeners} className="cursor-move p-2 -m-2 mb-2">
+    <div ref={setNodeRef} style={style}>
+      <div {...attributes} {...listeners} className="cursor-move p-2 -m-2 mb-2 section-drag-handle">
         <Icon name="GripVertical" size={16} className="text-muted-foreground mx-auto" />
       </div>
       {children}
