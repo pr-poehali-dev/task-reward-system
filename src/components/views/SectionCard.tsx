@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +37,7 @@ interface SectionCardProps {
   onNewTaskChange: (field: string, value: any) => void;
   onCreateTask: (sectionId: string) => void;
   onMoveSection: (sectionId: string, targetProjectId: string) => void;
+  onRenameSection?: (sectionId: string, newName: string) => void;
 }
 
 const SectionCard = ({
@@ -57,20 +59,67 @@ const SectionCard = ({
   onNewTaskChange,
   onCreateTask,
   onMoveSection,
+  onRenameSection,
 }: SectionCardProps) => {
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState(section.name);
   const otherProjects = projects.filter(p => p.id !== currentProjectId);
+
+  const handleNameDoubleClick = () => {
+    setIsEditingName(true);
+    setEditedName(section.name);
+  };
+
+  const handleNameSave = () => {
+    if (editedName.trim() && editedName !== section.name && onRenameSection) {
+      onRenameSection(section.id, editedName.trim());
+    }
+    setIsEditingName(false);
+  };
+
+  const handleNameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleNameSave();
+    } else if (e.key === 'Escape') {
+      setIsEditingName(false);
+      setEditedName(section.name);
+    }
+  };
   return (
     <Card className={`flex-shrink-0 w-80 p-4 flex flex-col section-card-content transition-all ${isOver ? 'ring-2 ring-primary shadow-lg scale-105' : ''}`} style={{ maxHeight: 'calc(100vh - 200px)' }}>
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2 flex-1">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           <div 
             {...dragHandleProps}
-            className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted/50 rounded transition-colors"
+            className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted/50 rounded transition-colors flex-shrink-0"
             title="Перетащить раздел"
           >
             <Icon name="GripVertical" size={16} className="text-muted-foreground" />
           </div>
-          <h3 className="font-semibold">{section.name}</h3>
+          {isEditingName ? (
+            <Input
+              value={editedName}
+              onChange={(e) => setEditedName(e.target.value)}
+              onBlur={handleNameSave}
+              onKeyDown={handleNameKeyDown}
+              autoFocus
+              className="h-7 font-semibold"
+            />
+          ) : (
+            <h3 
+              className="font-semibold cursor-text flex-shrink-0"
+              onDoubleClick={handleNameDoubleClick}
+              title="Дважды кликните для редактирования"
+            >
+              {section.name}
+            </h3>
+          )}
+          <div 
+            {...dragHandleProps}
+            className="flex-1 min-w-[20px] cursor-grab active:cursor-grabbing hover:bg-muted/30 rounded transition-colors"
+            style={{ minHeight: '28px' }}
+            title="Перетащить раздел"
+          />
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline">{sectionTasks.length}</Badge>

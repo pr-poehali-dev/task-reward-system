@@ -291,6 +291,23 @@ const ProjectsView = (props: ProjectsViewProps) => {
     setTasks(updatedTasks);
   };
 
+  const handleRenameSection = (sectionId: string, newName: string) => {
+    if (!setProjects) return;
+    
+    const updatedProjects = projects.map(p => {
+      if (p.id === selectedProjectId) {
+        return {
+          ...p,
+          sections: p.sections.map(s => 
+            s.id === sectionId ? { ...s, name: newName } : s
+          )
+        };
+      }
+      return p;
+    });
+    setProjects(updatedProjects);
+  };
+
   const sections = selectedProject?.sections || [];
   const activeTasks = tasks.filter(t => !t.completed && t.projectId === selectedProjectId);
   const noSectionTasks = activeTasks.filter(t => !t.sectionId);
@@ -428,6 +445,7 @@ const ProjectsView = (props: ProjectsViewProps) => {
                       onNewTaskChange={(field, value) => setNewTask({ ...newTask, [field]: value })}
                       onCreateTask={handleCreateTaskInSection}
                       onMoveSection={handleMoveSection}
+                      onRenameSection={handleRenameSection}
                     />
                   )}
                 </SortableSection>
