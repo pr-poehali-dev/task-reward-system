@@ -168,24 +168,20 @@ const ProjectsView = (props: ProjectsViewProps) => {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     
-    if (activeSection && over && setProjects) {
-      const overSection = sections.find(s => s.id === over.id);
+    if (activeSection && over && setProjects && active.id !== over.id) {
+      const activeIndex = sections.findIndex(s => s.id === active.id);
+      const overIndex = sections.findIndex(s => s.id === over.id);
       
-      if (overSection) {
-        const activeIndex = sections.findIndex(s => s.id === active.id);
-        const overIndex = sections.findIndex(s => s.id === over.id);
+      if (activeIndex !== -1 && overIndex !== -1) {
+        const reorderedSections = arrayMove(sections, activeIndex, overIndex);
+        const updatedSections = reorderedSections.map((s, idx) => ({ ...s, order: idx }));
         
-        if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
-          const reorderedSections = arrayMove(sections, activeIndex, overIndex);
-          const updatedSections = reorderedSections.map((s, idx) => ({ ...s, order: idx }));
-          
-          const updatedProjects = projects.map(p => 
-            p.id === selectedProjectId 
-              ? { ...p, sections: updatedSections }
-              : p
-          );
-          setProjects(updatedProjects);
-        }
+        const updatedProjects = projects.map(p => 
+          p.id === selectedProjectId 
+            ? { ...p, sections: updatedSections }
+            : p
+        );
+        setProjects(updatedProjects);
       }
     }
     
@@ -229,6 +225,32 @@ const ProjectsView = (props: ProjectsViewProps) => {
   const handleCreateTaskInSection = (sectionId: string) => {
     handleCreateTask(sectionId === 'none' ? '' : sectionId);
     setAddingToSection(null);
+  };
+
+  const handleMoveSection = (sectionId: string, targetProjectId: string) => {
+    if (!setProjects) return;
+    
+    const section = sections.find(s => s.id === sectionId);
+    if (!section) return;
+    
+    const updatedProjects = projects.map(p => {
+      if (p.id === section.projectId) {
+        return { ...p, sections: p.sections.filter(s => s.id !== sectionId) };
+      }
+      if (p.id === targetProjectId) {
+        return { 
+          ...p, 
+          sections: [...p.sections, { ...section, projectId: targetProjectId }] 
+        };
+      }
+      return p;
+    });
+    setProjects(updatedProjects);
+    
+    const updatedTasks = tasks.map(t =>
+      t.sectionId === sectionId ? { ...t, projectId: targetProjectId } : t
+    );
+    setTasks(updatedTasks);
   };
 
   const sections = selectedProject?.sections || [];
@@ -352,6 +374,8 @@ const ProjectsView = (props: ProjectsViewProps) => {
                     section={section}
                     sectionTasks={sectionTasks}
                     categories={categories}
+                    projects={projects}
+                    currentProjectId={selectedProjectId}
                     addingToSection={addingToSection}
                     newTask={newTask}
                     onDeleteSection={handleDeleteSection}
@@ -362,6 +386,7 @@ const ProjectsView = (props: ProjectsViewProps) => {
                     onCancelAdd={() => setAddingToSection(null)}
                     onNewTaskChange={(field, value) => setNewTask({ ...newTask, [field]: value })}
                     onCreateTask={handleCreateTaskInSection}
+                    onMoveSection={handleMoveSection}
                   />
                 </SortableSection>
               );

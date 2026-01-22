@@ -29,11 +29,11 @@ export const SortableSection = ({ section, children }: SortableSectionProps) => 
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
+    <div ref={setNodeRef} style={style} className="section-transition">
       <div 
         {...attributes} 
         {...listeners} 
-        className="cursor-grab active:cursor-grabbing p-3 bg-muted/30 rounded-md mb-2 section-drag-handle hover:bg-muted/50 transition-colors"
+        className="cursor-grab active:cursor-grabbing p-3 bg-muted/30 rounded-md mb-2 section-drag-handle hover:bg-muted/50 transition-all"
       >
         <Icon name="GripVertical" size={20} className="text-muted-foreground mx-auto" />
       </div>

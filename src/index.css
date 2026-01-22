@@ -4,6 +4,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .section-transition {
+    transition:
+      transform 300ms ease,
+      opacity 200ms ease;
+  }
+
+  .section-dragging {
+    z-index: 999;
+    cursor: grabbing !important;
+  }
+}
+
 @layer base {
   :root {
     --background: 240 12% 95%;
