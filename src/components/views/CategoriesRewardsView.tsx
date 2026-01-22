@@ -241,6 +241,28 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
   }
 
   if (viewType === 'rewards') {
+    const [editingReward, setEditingReward] = useState<RewardType | null>(null);
+    const [editValue, setEditValue] = useState('');
+
+    const handleRewardClick = (type: RewardType, currentValue: number) => {
+      setEditingReward(type);
+      setEditValue(currentValue.toString());
+    };
+
+    const handleRewardSave = (type: RewardType) => {
+      const numValue = parseInt(editValue) || 0;
+      props.setEarnedRewards?.((prev: EarnedRewards) => ({ ...prev, [type]: Math.max(0, numValue) }));
+      setEditingReward(null);
+    };
+
+    const handleRewardKeyDown = (e: React.KeyboardEvent, type: RewardType) => {
+      if (e.key === 'Enter') {
+        handleRewardSave(type);
+      } else if (e.key === 'Escape') {
+        setEditingReward(null);
+      }
+    };
+
     return (
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -278,23 +300,77 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
         
         <div className="grid gap-4 grid-cols-3 mb-6">
           {earnedRewards.points > 0 && (
-            <Card className="p-6 text-center">
+            <Card className="p-6 text-center hover:shadow-lg transition-all">
               <Icon name="Star" size={32} className="mx-auto mb-2 text-yellow-500" />
-              <p className="text-3xl font-bold text-foreground">{earnedRewards.points}</p>
+              {editingReward === 'points' ? (
+                <Input
+                  type="number"
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  onBlur={() => handleRewardSave('points')}
+                  onKeyDown={(e) => handleRewardKeyDown(e, 'points')}
+                  autoFocus
+                  className="text-3xl font-bold text-center h-14 mb-2"
+                  min="0"
+                />
+              ) : (
+                <p 
+                  className="text-3xl font-bold text-foreground cursor-pointer hover:text-primary transition-colors mb-2"
+                  onClick={() => handleRewardClick('points', earnedRewards.points)}
+                >
+                  {earnedRewards.points}
+                </p>
+              )}
               <p className="text-sm text-muted-foreground">Баллов заработано</p>
             </Card>
           )}
           {earnedRewards.minutes > 0 && (
-            <Card className="p-6 text-center">
+            <Card className="p-6 text-center hover:shadow-lg transition-all">
               <Icon name="Clock" size={32} className="mx-auto mb-2 text-blue-500" />
-              <p className="text-3xl font-bold text-foreground">{earnedRewards.minutes}</p>
+              {editingReward === 'minutes' ? (
+                <Input
+                  type="number"
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  onBlur={() => handleRewardSave('minutes')}
+                  onKeyDown={(e) => handleRewardKeyDown(e, 'minutes')}
+                  autoFocus
+                  className="text-3xl font-bold text-center h-14 mb-2"
+                  min="0"
+                />
+              ) : (
+                <p 
+                  className="text-3xl font-bold text-foreground cursor-pointer hover:text-primary transition-colors mb-2"
+                  onClick={() => handleRewardClick('minutes', earnedRewards.minutes)}
+                >
+                  {earnedRewards.minutes}
+                </p>
+              )}
               <p className="text-sm text-muted-foreground">Минут заработано</p>
             </Card>
           )}
           {earnedRewards.rubles > 0 && (
-            <Card className="p-6 text-center">
+            <Card className="p-6 text-center hover:shadow-lg transition-all">
               <Icon name="DollarSign" size={32} className="mx-auto mb-2 text-green-500" />
-              <p className="text-3xl font-bold text-foreground">{earnedRewards.rubles}</p>
+              {editingReward === 'rubles' ? (
+                <Input
+                  type="number"
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  onBlur={() => handleRewardSave('rubles')}
+                  onKeyDown={(e) => handleRewardKeyDown(e, 'rubles')}
+                  autoFocus
+                  className="text-3xl font-bold text-center h-14 mb-2"
+                  min="0"
+                />
+              ) : (
+                <p 
+                  className="text-3xl font-bold text-foreground cursor-pointer hover:text-primary transition-colors mb-2"
+                  onClick={() => handleRewardClick('rubles', earnedRewards.rubles)}
+                >
+                  {earnedRewards.rubles}
+                </p>
+              )}
               <p className="text-sm text-muted-foreground">Рублей заработано</p>
             </Card>
           )}
