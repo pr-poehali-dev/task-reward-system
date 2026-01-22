@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,79 @@ import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { Task, Category, ActivityLog, EarnedRewards, RewardType } from '@/types/task';
 import { ICONS_LIST, COLORS_LIST } from '@/types/task';
+
+interface RewardCardProps {
+  type: RewardType;
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+}
+
+const RewardCard = ({ type, label, value, onChange }: RewardCardProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputValue, setInputValue] = useState(value.toString());
+
+  const handleBlur = () => {
+    const numValue = parseInt(inputValue) || 0;
+    onChange(Math.max(0, numValue));
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleBlur();
+    } else if (e.key === 'Escape') {
+      setInputValue(value.toString());
+      setIsEditing(false);
+    }
+  };
+
+  return (
+    <Card className="p-4 text-center hover:shadow-md transition-all">
+      <div className="flex flex-col items-center gap-2">
+        {isEditing ? (
+          <Input
+            type="number"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            autoFocus
+            className="text-2xl font-bold text-center h-10 w-20"
+            min="0"
+          />
+        ) : (
+          <div
+            className="text-2xl font-bold text-foreground cursor-pointer hover:text-primary transition-colors"
+            onClick={() => {
+              setIsEditing(true);
+              setInputValue(value.toString());
+            }}
+          >
+            {value}
+          </div>
+        )}
+        <div className="text-xs text-muted-foreground">{label}</div>
+        <div className="flex gap-1">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onChange(Math.max(0, value - 1))}
+          >
+            <Icon name="Minus" size={14} />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onChange(value + 1)}
+          >
+            <Icon name="Plus" size={14} />
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+};
 
 interface CategoriesRewardsViewProps {
   viewType: 'categories' | 'rewards' | 'history';
@@ -187,28 +261,13 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
                   {(['points', 'minutes', 'rubles'] as RewardType[]).map((type) => {
                     const labels = { points: 'Баллы', minutes: 'Минуты', rubles: 'Рубли' };
                     return (
-                      <Card key={type} className="p-4 text-center cursor-pointer hover:shadow-md transition-all">
-                        <div className="flex flex-col items-center gap-2">
-                          <div className="text-2xl font-bold text-foreground">{earnedRewards[type]}</div>
-                          <div className="text-xs text-muted-foreground">{labels[type]}</div>
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => props.setEarnedRewards?.((prev: EarnedRewards) => ({ ...prev, [type]: Math.max(0, prev[type] - 1) }))}
-                            >
-                              <Icon name="Minus" size={14} />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => props.setEarnedRewards?.((prev: EarnedRewards) => ({ ...prev, [type]: prev[type] + 1 }))}
-                            >
-                              <Icon name="Plus" size={14} />
-                            </Button>
-                          </div>
-                        </div>
-                      </Card>
+                      <RewardCard
+                        key={type}
+                        type={type}
+                        label={labels[type]}
+                        value={earnedRewards[type]}
+                        onChange={(newValue) => props.setEarnedRewards?.((prev: EarnedRewards) => ({ ...prev, [type]: newValue }))}
+                      />
                     );
                   })}
                 </div>

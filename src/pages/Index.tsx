@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Calendar } from '@/components/ui/calendar';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import Icon from '@/components/ui/icon';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -48,7 +49,41 @@ const Index = ({ user, token, onLogout }: IndexProps) => {
               <p className="text-sm text-muted-foreground">Управляй проектами и достигай целей</p>
             </div>
             <div className="flex gap-2 items-center">
-              <span className="text-sm text-muted-foreground mr-2">{user.username}</span>
+              <div className="flex items-center gap-2 mr-2">
+                <span className="text-sm text-muted-foreground">{user.username}</span>
+                <div className="flex items-center gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center justify-center w-6 h-6 bg-yellow-500/10 rounded-full cursor-help">
+                        <span className="text-xs">⭐</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-sm font-medium">{manager.earnedRewards.points} баллов</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center justify-center w-6 h-6 bg-blue-500/10 rounded-full cursor-help">
+                        <span className="text-xs">⏱️</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-sm font-medium">{manager.earnedRewards.minutes} минут</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center justify-center w-6 h-6 bg-green-500/10 rounded-full cursor-help">
+                        <span className="text-xs">💰</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-sm font-medium">{manager.earnedRewards.rubles} рублей</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
               <div className="relative">
                 <Button
                   variant="outline"
