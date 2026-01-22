@@ -29,14 +29,13 @@ export const SortableSection = ({ section, children }: SortableSectionProps) => 
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="section-transition">
-      <div 
-        {...attributes} 
-        {...listeners} 
-        className="cursor-grab active:cursor-grabbing p-3 bg-muted/30 rounded-md mb-2 section-drag-handle hover:bg-muted/50 transition-all"
-      >
-        <Icon name="GripVertical" size={20} className="text-muted-foreground mx-auto" />
-      </div>
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className="section-transition"
+      {...attributes} 
+      {...listeners}
+    >
       {children}
     </div>
   );
@@ -80,13 +79,11 @@ export const SortableTask = ({ task, onEdit, onComplete, onDelete }: SortableTas
       ref={setNodeRef} 
       style={style} 
       {...attributes}
-      className="p-3 hover:shadow-md transition-all cursor-pointer task-card"
+      {...listeners}
+      className="p-3 hover:shadow-md transition-all cursor-grab active:cursor-grabbing task-card"
       onClick={() => onEdit(task)}
     >
       <div className="flex items-center gap-2">
-        <div {...listeners} className="cursor-grab active:cursor-grabbing">
-          <Icon name="GripVertical" size={14} className="text-muted-foreground" />
-        </div>
         <div className="flex-1">
           <div className="flex items-center justify-between mb-1">
             <h4 className="font-medium">{task.title}</h4>

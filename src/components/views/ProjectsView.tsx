@@ -93,7 +93,7 @@ const ProjectsView = (props: ProjectsViewProps) => {
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
-    if (target.closest('.task-card, .section-card-content, .section-drag-handle')) return;
+    if (target.closest('.task-card, .section-card-content')) return;
     
     const container = scrollContainerRef.current;
     if (!container) return;
