@@ -19,17 +19,23 @@ export const SortableSection = ({ section, children }: SortableSectionProps) => 
     setNodeRef,
     transform,
     transition,
+    isDragging,
   } = useSortable({ id: section.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.5 : 1,
   };
 
   return (
     <div ref={setNodeRef} style={style}>
-      <div {...attributes} {...listeners} className="cursor-move p-2 -m-2 mb-2 section-drag-handle">
-        <Icon name="GripVertical" size={16} className="text-muted-foreground mx-auto" />
+      <div 
+        {...attributes} 
+        {...listeners} 
+        className="cursor-grab active:cursor-grabbing p-3 bg-muted/30 rounded-md mb-2 section-drag-handle hover:bg-muted/50 transition-colors"
+      >
+        <Icon name="GripVertical" size={20} className="text-muted-foreground mx-auto" />
       </div>
       {children}
     </div>
