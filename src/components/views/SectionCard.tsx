@@ -219,7 +219,7 @@ const SectionCard = ({
         <Button
           variant="outline"
           size="sm"
-          className="w-full mt-2"
+          className="w-full mt-2 text-muted-foreground font-normal"
           onClick={() => onAddTask(section.id)}
         >
           <Icon name="Plus" size={14} className="mr-2" />

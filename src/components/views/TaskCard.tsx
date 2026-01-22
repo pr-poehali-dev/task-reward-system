@@ -50,7 +50,7 @@ export const TaskCard = ({
               <Badge variant="outline" className="text-xs">{section.name}</Badge>
             )}
           </div>
-          <h3 className={`font-semibold mb-1 ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+          <h3 className={`font-normal mb-1 ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
             {task.title}
           </h3>
           {task.description && (
