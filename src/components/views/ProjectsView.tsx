@@ -169,10 +169,22 @@ const ProjectsView = (props: ProjectsViewProps) => {
     const { active, over } = event;
     
     if (activeSection && over && setProjects && active.id !== over.id) {
-      const activeIndex = sections.findIndex(s => s.id === active.id);
-      const overIndex = sections.findIndex(s => s.id === over.id);
+      const overId = over.id as string;
+      let targetSectionId = overId;
       
-      if (activeIndex !== -1 && overIndex !== -1) {
+      if (overId.startsWith('droppable-')) {
+        targetSectionId = overId.replace('droppable-', '');
+      }
+      
+      const overTask = tasks.find(t => t.id === overId);
+      if (overTask && overTask.sectionId) {
+        targetSectionId = overTask.sectionId;
+      }
+      
+      const activeIndex = sections.findIndex(s => s.id === active.id);
+      const overIndex = sections.findIndex(s => s.id === targetSectionId);
+      
+      if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
         const reorderedSections = arrayMove(sections, activeIndex, overIndex);
         const updatedSections = reorderedSections.map((s, idx) => ({ ...s, order: idx }));
         
