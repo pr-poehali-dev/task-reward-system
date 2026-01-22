@@ -44,6 +44,10 @@ export interface ActivityLog {
   action: string;
   description: string;
   timestamp: Date;
+  undoData?: {
+    type: 'task_complete' | 'task_delete' | 'task_create' | 'category_delete' | 'project_delete' | 'section_delete' | 'theme_change' | 'reward_change';
+    data: any;
+  };
 }
 
 export interface EarnedRewards {

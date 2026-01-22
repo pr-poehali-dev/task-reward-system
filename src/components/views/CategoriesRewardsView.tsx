@@ -111,6 +111,7 @@ interface CategoriesRewardsViewProps {
   handleUpdateCategory: () => void;
   handleDeleteCategory: (id: string) => void;
   handleAddManualReward: () => void;
+  handleUndoAction: (logId: string) => void;
   setEarnedRewards?: (rewards: EarnedRewards | ((prev: EarnedRewards) => EarnedRewards)) => void;
 }
 
@@ -398,15 +399,28 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
             </Card>
           ) : (
             activityLog.map(log => (
-              <Card key={log.id} className="p-4">
+              <Card key={log.id} className="p-4 hover:shadow-md transition-all">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
                     <h3 className="font-semibold text-sm mb-1">{log.action}</h3>
                     <p className="text-sm text-muted-foreground">{log.description}</p>
                   </div>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {format(log.timestamp, 'HH:mm', { locale: ru })}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {format(log.timestamp, 'HH:mm', { locale: ru })}
+                    </span>
+                    {log.undoData && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        onClick={() => props.handleUndoAction(log.id)}
+                        title="Отменить действие"
+                      >
+                        <Icon name="Undo2" size={14} />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </Card>
             ))

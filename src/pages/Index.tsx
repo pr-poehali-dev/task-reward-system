@@ -197,6 +197,7 @@ const Index = ({ user, token, onLogout }: IndexProps) => {
             handleDeleteSection={manager.handleDeleteSection}
             handleAddManualReward={manager.handleAddManualReward}
             handleUncompleteTask={manager.handleUncompleteTask}
+            handleUndoAction={manager.handleUndoAction}
             getCategoryById={manager.getCategoryById}
             setSidebarView={manager.setSidebarView}
             setEarnedRewards={manager.setEarnedRewards}

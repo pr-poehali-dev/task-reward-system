@@ -77,6 +77,7 @@ interface TaskViewsProps {
   handleDeleteSection: (id: string) => void;
   handleAddManualReward: () => void;
   handleUncompleteTask?: (id: string) => void;
+  handleUndoAction: (logId: string) => void;
   getCategoryById: (id: string) => Category | undefined;
   setSidebarView: (view: SidebarView) => void;
   setEarnedRewards?: (rewards: EarnedRewards | ((prev: EarnedRewards) => EarnedRewards)) => void;
@@ -155,6 +156,7 @@ export const TaskViews = (props: TaskViewsProps) => {
         handleUpdateCategory={props.handleUpdateCategory}
         handleDeleteCategory={props.handleDeleteCategory}
         handleAddManualReward={props.handleAddManualReward}
+        handleUndoAction={props.handleUndoAction}
         setEarnedRewards={props.setEarnedRewards}
       />
     );

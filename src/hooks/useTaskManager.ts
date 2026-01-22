@@ -270,20 +270,81 @@ export const useTaskManager = (token: string) => {
 
 
 
-  const addActivityLog = (action: string, description: string) => {
+  const addActivityLog = (action: string, description: string, undoData?: ActivityLog['undoData']) => {
     const log: ActivityLog = {
       id: Date.now().toString(),
       action,
       description,
       timestamp: new Date(),
+      undoData,
     };
     setActivityLog(prev => [log, ...prev]);
   };
 
+  const handleUndoAction = (logId: string) => {
+    const log = activityLog.find(l => l.id === logId);
+    if (!log || !log.undoData) return;
+
+    const { type, data } = log.undoData;
+
+    switch (type) {
+      case 'task_complete':
+        handleUncompleteTask(data.taskId);
+        break;
+      
+      case 'task_delete':
+        setTasks(prev => [...prev, data.task]);
+        toast.success('Задача восстановлена');
+        break;
+      
+      case 'task_create':
+        setTasks(prev => prev.filter(t => t.id !== data.taskId));
+        toast.success('Создание задачи отменено');
+        break;
+      
+      case 'category_delete':
+        setCategories(prev => [...prev, data.category]);
+        toast.success('Категория восстановлена');
+        break;
+      
+      case 'project_delete':
+        setProjects(prev => [...prev, data.project]);
+        toast.success('Проект восстановлен');
+        break;
+      
+      case 'section_delete':
+        setProjects(prev => prev.map(p => 
+          p.id === data.projectId 
+            ? { ...p, sections: [...(p.sections || []), data.section] }
+            : p
+        ));
+        setTasks(prev => [...prev, ...data.sectionTasks]);
+        toast.success('Раздел восстановлен');
+        break;
+      
+      case 'theme_change':
+        setIsDarkMode(data.previousTheme);
+        toast.success('Тема изменена обратно');
+        break;
+      
+      case 'reward_change':
+        setEarnedRewards(data.previousRewards);
+        toast.success('Награды восстановлены');
+        break;
+    }
+
+    setActivityLog(prev => prev.filter(l => l.id !== logId));
+  };
+
   const toggleTheme = () => {
+    const previousTheme = isDarkMode;
     setIsDarkMode(!isDarkMode);
     toast.success(isDarkMode ? 'Светлая тема включена' : 'Тёмная тема включена');
-    addActivityLog('Изменение темы', isDarkMode ? 'Включена светлая тема' : 'Включена тёмная тема');
+    addActivityLog(
+      'Изменение темы', 
+      isDarkMode ? 'Включена светлая тема' : 'Включена тёмная тема',
+      { type: 'theme_change', data: { previousTheme } }
+    );
   };
 
   const handleCreateTask = (overrideSectionId?: string) => {
@@ -315,7 +376,11 @@ export const useTaskManager = (token: string) => {
     });
     setSelectedDate(new Date());
     toast.success('Задача создана!');
-    addActivityLog('Создание задачи', `Создана задача: ${task.title}`);
+    addActivityLog(
+      'Создание задачи', 
+      `Создана задача: ${task.title}`,
+      { type: 'task_create', data: { taskId: task.id } }
+    );
   };
 
   const handleCompleteTask = (taskId: string) => {
@@ -334,7 +399,11 @@ export const useTaskManager = (token: string) => {
           [t.rewardType]: prev[t.rewardType] + t.rewardAmount,
         }));
         
-        addActivityLog('Выполнение задачи', `Задача "${t.title}" выполнена. Получено: +${t.rewardAmount} ${rewardText}`);
+        addActivityLog(
+          'Выполнение задачи', 
+          `Задача "${t.title}" выполнена. Получено: +${t.rewardAmount} ${rewardText}`,
+          { type: 'task_complete', data: { taskId: t.id } }
+        );
         
         return { ...t, completed: true };
       }
@@ -369,7 +438,11 @@ export const useTaskManager = (token: string) => {
     setTasks(tasks.filter(t => t.id !== taskId));
     toast.success('Задача удалена');
     if (task) {
-      addActivityLog('Удаление задачи', `Удалена задача: ${task.title}`);
+      addActivityLog(
+        'Удаление задачи', 
+        `Удалена задача: ${task.title}`,
+        { type: 'task_delete', data: { task } }
+      );
     }
   };
 
@@ -429,7 +502,11 @@ export const useTaskManager = (token: string) => {
     setCategories(categories.filter(cat => cat.id !== categoryId));
     toast.success('Категория удалена');
     if (category) {
-      addActivityLog('Удаление категории', `Удалена категория: ${category.name}`);
+      addActivityLog(
+        'Удаление категории', 
+        `Удалена категория: ${category.name}`,
+        { type: 'category_delete', data: { category } }
+      );
     }
   };
 
@@ -498,7 +575,11 @@ export const useTaskManager = (token: string) => {
     }
     toast.success('Проект удален');
     if (project) {
-      addActivityLog('Удаление проекта', `Удален проект: ${project.name}`);
+      addActivityLog(
+        'Удаление проекта', 
+        `Удален проект: ${project.name}`,
+        { type: 'project_delete', data: { project } }
+      );
     }
   };
 
@@ -533,6 +614,7 @@ export const useTaskManager = (token: string) => {
   const handleDeleteSection = (sectionId: string) => {
     const project = projects.find(p => p.id === selectedProjectId);
     const section = project?.sections?.find(s => s.id === sectionId);
+    const sectionTasks = tasks.filter(task => task.sectionId === sectionId);
     
     setProjects(projects.map(proj => 
       proj.id === selectedProjectId 
@@ -543,7 +625,11 @@ export const useTaskManager = (token: string) => {
     toast.success('Раздел удалён');
     
     if (section) {
-      addActivityLog('Удаление раздела', `Удалён раздел: ${section.name}`);
+      addActivityLog(
+        'Удаление раздела', 
+        `Удалён раздел: ${section.name}`,
+        { type: 'section_delete', data: { section, projectId: selectedProjectId, sectionTasks } }
+      );
     }
   };
 
@@ -640,6 +726,7 @@ export const useTaskManager = (token: string) => {
     handleDeleteSection,
     handleAddManualReward,
     handleUncompleteTask,
+    handleUndoAction,
     getCategoryById,
     syncToCloud,
     isSyncing,
