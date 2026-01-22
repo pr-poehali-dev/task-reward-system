@@ -126,21 +126,16 @@ const ProjectsView = (props: ProjectsViewProps) => {
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    console.log('[DragStart] active.id:', active.id);
     
     const task = tasks.find(t => t.id === active.id);
     if (task) {
-      console.log('[DragStart] Found task:', task.title);
       setActiveTask(task);
       return;
     }
     
     const section = sections.find(s => s.id === active.id);
     if (section) {
-      console.log('[DragStart] Found section:', section.name);
       setActiveSection(section);
-    } else {
-      console.log('[DragStart] No task or section found');
     }
   };
 
@@ -172,28 +167,25 @@ const ProjectsView = (props: ProjectsViewProps) => {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    console.log('[DragEnd] active:', active.id, 'over:', over?.id);
-    console.log('[DragEnd] activeSection:', activeSection?.name);
-    console.log('[DragEnd] sections:', sections.map(s => s.id));
     
     if (activeSection && over && setProjects) {
-      const activeIndex = sections.findIndex(s => s.id === active.id);
-      const overIndex = sections.findIndex(s => s.id === over.id);
+      const overSection = sections.find(s => s.id === over.id);
       
-      console.log('[DragEnd] activeIndex:', activeIndex, 'overIndex:', overIndex);
-      
-      if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
-        console.log('[DragEnd] Reordering sections');
-        const reorderedSections = arrayMove(sections, activeIndex, overIndex);
-        const updatedSections = reorderedSections.map((s, idx) => ({ ...s, order: idx }));
+      if (overSection) {
+        const activeIndex = sections.findIndex(s => s.id === active.id);
+        const overIndex = sections.findIndex(s => s.id === over.id);
         
-        const updatedProjects = projects.map(p => 
-          p.id === selectedProjectId 
-            ? { ...p, sections: updatedSections }
-            : p
-        );
-        console.log('[DragEnd] Updated projects:', updatedProjects);
-        setProjects(updatedProjects);
+        if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
+          const reorderedSections = arrayMove(sections, activeIndex, overIndex);
+          const updatedSections = reorderedSections.map((s, idx) => ({ ...s, order: idx }));
+          
+          const updatedProjects = projects.map(p => 
+            p.id === selectedProjectId 
+              ? { ...p, sections: updatedSections }
+              : p
+          );
+          setProjects(updatedProjects);
+        }
       }
     }
     
