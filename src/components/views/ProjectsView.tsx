@@ -75,6 +75,7 @@ const ProjectsView = (props: ProjectsViewProps) => {
   );
 
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [activeSection, setActiveSection] = useState<Section | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Task>>({});
@@ -122,7 +123,14 @@ const ProjectsView = (props: ProjectsViewProps) => {
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const task = tasks.find(t => t.id === active.id);
-    if (task) setActiveTask(task);
+    if (task) {
+      setActiveTask(task);
+      return;
+    }
+    const section = sections.find(s => s.id === active.id);
+    if (section) {
+      setActiveSection(section);
+    }
   };
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -130,29 +138,78 @@ const ProjectsView = (props: ProjectsViewProps) => {
     if (!over) return;
 
     const activeTask = tasks.find(t => t.id === active.id);
-    if (!activeTask) return;
+    if (activeTask) {
+      const overTask = tasks.find(t => t.id === over.id);
+      const overSection = over.id;
 
-    const overTask = tasks.find(t => t.id === over.id);
-    const overSection = over.id;
-
-    if (overTask && activeTask.sectionId !== overTask.sectionId) {
-      const updatedTasks = tasks.map(t =>
-        t.id === activeTask.id ? { ...t, sectionId: overTask.sectionId } : t
-      );
-      setTasks(updatedTasks);
-    } else if (typeof overSection === 'string' && overSection.startsWith('droppable-')) {
-      const newSectionId = overSection.replace('droppable-', '');
-      if (activeTask.sectionId !== newSectionId) {
+      if (overTask && activeTask.sectionId !== overTask.sectionId) {
         const updatedTasks = tasks.map(t =>
-          t.id === activeTask.id ? { ...t, sectionId: newSectionId === 'none' ? '' : newSectionId } : t
+          t.id === activeTask.id ? { ...t, sectionId: overTask.sectionId } : t
         );
         setTasks(updatedTasks);
+      } else if (typeof overSection === 'string' && overSection.startsWith('droppable-')) {
+        const newSectionId = overSection.replace('droppable-', '');
+        if (activeTask.sectionId !== newSectionId) {
+          const updatedTasks = tasks.map(t =>
+            t.id === activeTask.id ? { ...t, sectionId: newSectionId === 'none' ? '' : newSectionId } : t
+          );
+          setTasks(updatedTasks);
+        }
       }
     }
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (activeSection && over) {
+      const activeIndex = sections.findIndex(s => s.id === active.id);
+      const overIndex = sections.findIndex(s => s.id === over.id);
+      
+      if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
+        const reorderedSections = [...sections];
+        const [movedSection] = reorderedSections.splice(activeIndex, 1);
+        reorderedSections.splice(overIndex, 0, movedSection);
+        
+        const updatedSections = reorderedSections.map((s, idx) => ({ ...s, order: idx }));
+        
+        if (setProjects) {
+          const updatedProjects = projects.map(p => 
+            p.id === selectedProjectId 
+              ? { ...p, sections: updatedSections }
+              : p
+          );
+          setProjects(updatedProjects);
+        }
+      }
+      
+      if (typeof over.id === 'string' && over.id.startsWith('project-')) {
+        const targetProjectId = over.id.replace('project-', '');
+        if (targetProjectId !== activeSection.projectId && setProjects) {
+          const updatedProjects = projects.map(p => {
+            if (p.id === activeSection.projectId) {
+              return { ...p, sections: p.sections.filter(s => s.id !== activeSection.id) };
+            }
+            if (p.id === targetProjectId) {
+              return { 
+                ...p, 
+                sections: [...p.sections, { ...activeSection, projectId: targetProjectId }] 
+              };
+            }
+            return p;
+          });
+          setProjects(updatedProjects);
+          
+          const updatedTasks = tasks.map(t =>
+            t.sectionId === activeSection.id ? { ...t, projectId: targetProjectId } : t
+          );
+          setTasks(updatedTasks);
+        }
+      }
+    }
+    
     setActiveTask(null);
+    setActiveSection(null);
   };
 
   const handleEditTask = (task: Task) => {
@@ -295,7 +352,7 @@ const ProjectsView = (props: ProjectsViewProps) => {
           </Card>
         )}
 
-        <SortableContext items={sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+        <SortableContext items={sections.map(s => s.id)}>
           <div 
             ref={scrollContainerRef}
             className="flex gap-4 overflow-x-auto pb-4 cursor-grab"
@@ -341,6 +398,10 @@ const ProjectsView = (props: ProjectsViewProps) => {
               {activeTask.description && (
                 <p className="text-sm text-muted-foreground">{activeTask.description}</p>
               )}
+            </Card>
+          ) : activeSection ? (
+            <Card className="p-4 opacity-80 shadow-lg w-80">
+              <h3 className="font-semibold">{activeSection.name}</h3>
             </Card>
           ) : null}
         </DragOverlay>
