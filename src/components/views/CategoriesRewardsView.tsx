@@ -388,6 +388,8 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
   }
 
   if (viewType === 'history') {
+    console.log('Activity log:', activityLog.map(l => ({ id: l.id, action: l.action, hasUndo: !!l.undoData })));
+    
     return (
       <div>
         <h2 className="text-xl font-semibold mb-4">Журнал действий</h2>
