@@ -93,7 +93,15 @@ const ProjectsView = (props: ProjectsViewProps) => {
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
-    if (target.closest('.task-card, .section-card-content')) return;
+    
+    // Блокируем drag для интерактивных элементов
+    if (
+      target.closest('.task-card, .section-card-content') ||
+      target.closest('input, textarea, button, select, [role="combobox"], [role="option"]') ||
+      target.closest('[data-radix-select-trigger], [data-radix-select-content]')
+    ) {
+      return;
+    }
     
     const container = scrollContainerRef.current;
     if (!container) return;
