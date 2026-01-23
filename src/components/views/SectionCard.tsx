@@ -166,7 +166,7 @@ const SectionCard = ({
       </DroppableArea>
 
       {addingToSection === section.id ? (
-        <Card className="p-3 mt-2 space-y-2">
+        <Card className="p-3 mt-2 space-y-2" onPointerDown={(e) => e.stopPropagation()}>
           <Input
             placeholder="Название задачи"
             value={newTask.title}
