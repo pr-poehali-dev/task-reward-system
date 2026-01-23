@@ -1,4 +1,4 @@
-import type { Task, Category, Project, ActivityLog, EarnedRewards, RewardType, SidebarView } from '@/types/task';
+import type { Task, Category, Project, ActivityLog, EarnedRewards, RewardType, Priority, SidebarView } from '@/types/task';
 import ProjectsView from './views/ProjectsView';
 import SearchCompletedView from './views/SearchCompletedView';
 import CategoriesRewardsView from './views/CategoriesRewardsView';
@@ -30,9 +30,10 @@ interface TaskViewsProps {
   newTask: {
     title: string;
     description: string;
-    category: string;
+    priority: Priority;
     rewardType: RewardType;
     rewardAmount: number;
+    rewardDescription: string;
     sectionId: string;
   };
   setNewTask: (task: any) => void;

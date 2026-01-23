@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
-import type { Task, Category, Project, Section, ActivityLog, EarnedRewards, RewardType, ViewMode, SidebarView } from '@/types/task';
+import type { Task, Category, Project, Section, ActivityLog, EarnedRewards, RewardType, Priority, ViewMode, SidebarView } from '@/types/task';
 
 export const useTaskManager = (token: string) => {
   const [tasks, setTasks] = useState<Task[]>(() => {
@@ -12,22 +12,13 @@ export const useTaskManager = (token: string) => {
         ...t,
         createdAt: new Date(t.createdAt),
         scheduledDate: t.scheduledDate ? new Date(t.scheduledDate) : undefined,
-        priority: t.priority || 2,
+        priority: t.priority || 'medium' as Priority,
       }));
     }
     return [];
   });
   
-  const [categories, setCategories] = useState<Category[]>(() => {
-    const saved = localStorage.getItem('categories');
-    return saved ? JSON.parse(saved) : [
-      { id: 'work', name: 'Работа', icon: 'Briefcase', color: 'bg-blue-500' },
-      { id: 'personal', name: 'Личное', icon: 'User', color: 'bg-green-500' },
-      { id: 'health', name: 'Здоровье', icon: 'Heart', color: 'bg-red-500' },
-      { id: 'learning', name: 'Обучение', icon: 'BookOpen', color: 'bg-purple-500' },
-      { id: 'home', name: 'Дом', icon: 'Home', color: 'bg-orange-500' },
-    ];
-  });
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const [projects, setProjects] = useState<Project[]>(() => {
     const saved = localStorage.getItem('projects');
@@ -99,11 +90,11 @@ export const useTaskManager = (token: string) => {
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
-    category: 'work',
+    priority: 'medium' as Priority,
     rewardType: 'minutes' as RewardType,
     rewardAmount: 10,
+    rewardDescription: '',
     sectionId: '',
-    priority: 2 as 1 | 2 | 3 | 4,
   });
 
   const [newCategory, setNewCategory] = useState({
@@ -253,7 +244,7 @@ export const useTaskManager = (token: string) => {
             ...t,
             createdAt: new Date(t.created_at),
             scheduledDate: t.scheduled_date ? new Date(t.scheduled_date) : undefined,
-            priority: t.priority || 2,
+            priority: t.priority || 'medium' as Priority,
           }));
           setTasks(parsedTasks);
         }
@@ -368,11 +359,11 @@ export const useTaskManager = (token: string) => {
     setNewTask({
       title: '',
       description: '',
-      category: categories[0]?.id || 'work',
+      priority: 'medium',
       rewardType: 'minutes',
       rewardAmount: 10,
+      rewardDescription: '',
       sectionId: '',
-      priority: 2 as 1 | 2 | 3 | 4,
     });
     setSelectedDate(new Date());
     toast.success('Задача создана!');
@@ -389,15 +380,18 @@ export const useTaskManager = (token: string) => {
 
     setTasks(tasks.map(t => {
       if (t.id === taskId) {
-        const rewardText = t.rewardType === 'points' ? 'баллов' : t.rewardType === 'minutes' ? 'минут' : 'рублей';
-        toast.success(`+${t.rewardAmount} ${rewardText}`, {
+        const rewardText = t.rewardType === 'points' ? 'баллов' : t.rewardType === 'minutes' ? 'минут' : t.rewardType === 'rubles' ? 'рублей' : 'приз';
+        const rewardDisplay = t.rewardType === 'prize' ? t.rewardDescription || 'приз' : `+${t.rewardAmount} ${rewardText}`;
+        toast.success(rewardDisplay, {
           description: t.title,
         });
         
-        setEarnedRewards(prev => ({
-          ...prev,
-          [t.rewardType]: prev[t.rewardType] + t.rewardAmount,
-        }));
+        if (t.rewardType !== 'prize') {
+          setEarnedRewards(prev => ({
+            ...prev,
+            [t.rewardType]: prev[t.rewardType] + t.rewardAmount,
+          }));
+        }
         
         addActivityLog(
           'Выполнение задачи', 
@@ -417,12 +411,14 @@ export const useTaskManager = (token: string) => {
 
     setTasks(tasks.map(t => {
       if (t.id === taskId) {
-        const rewardText = t.rewardType === 'points' ? 'баллов' : t.rewardType === 'minutes' ? 'минут' : 'рублей';
+        const rewardText = t.rewardType === 'points' ? 'баллов' : t.rewardType === 'minutes' ? 'минут' : t.rewardType === 'rubles' ? 'рублей' : 'приз';
         
-        setEarnedRewards(prev => ({
-          ...prev,
-          [t.rewardType]: Math.max(0, prev[t.rewardType] - t.rewardAmount),
-        }));
+        if (t.rewardType !== 'prize') {
+          setEarnedRewards(prev => ({
+            ...prev,
+            [t.rewardType]: Math.max(0, prev[t.rewardType] - t.rewardAmount),
+          }));
+        }
         
         addActivityLog('Возврат задачи', `Задача "${t.title}" возвращена в активные. Списано: -${t.rewardAmount} ${rewardText}`);
         toast.info(`Задача возвращена в активные`, { description: t.title });
@@ -660,7 +656,7 @@ export const useTaskManager = (token: string) => {
     setIsRewardDialogOpen(false);
   };
 
-  const getCategoryById = (id: string) => categories.find(cat => cat.id === id);
+  const getCategoryById = (id: string) => undefined;
 
   return {
     tasks,

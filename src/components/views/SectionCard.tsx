@@ -179,14 +179,14 @@ const SectionCard = ({
             rows={2}
           />
           <div className="grid grid-cols-2 gap-2">
-            <Select value={newTask.category} onValueChange={(v) => onNewTaskChange('category', v)}>
+            <Select value={newTask.priority} onValueChange={(v) => onNewTaskChange('priority', v)}>
               <SelectTrigger>
-                <SelectValue placeholder="Категория" />
+                <SelectValue placeholder="Приоритет" />
               </SelectTrigger>
               <SelectContent>
-                {categories.map(cat => (
-                  <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                ))}
+                <SelectItem value="low">🔵 Низкий</SelectItem>
+                <SelectItem value="medium">🟡 Средний</SelectItem>
+                <SelectItem value="high">🔴 Высокий</SelectItem>
               </SelectContent>
             </Select>
             <Select value={newTask.rewardType} onValueChange={(v) => onNewTaskChange('rewardType', v)}>
@@ -196,16 +196,25 @@ const SectionCard = ({
               <SelectContent>
                 <SelectItem value="points">⭐ Баллы</SelectItem>
                 <SelectItem value="minutes">⏱️ Минуты</SelectItem>
-                <SelectItem value="money">💰 Деньги</SelectItem>
+                <SelectItem value="rubles">💰 Рубли</SelectItem>
+                <SelectItem value="prize">🎁 Приз</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <Input
-            type="number"
-            placeholder="Сумма"
-            value={newTask.rewardAmount}
-            onChange={(e) => onNewTaskChange('rewardAmount', Number(e.target.value))}
-          />
+          {newTask.rewardType === 'prize' ? (
+            <Input
+              placeholder="Описание приза"
+              value={newTask.rewardDescription}
+              onChange={(e) => onNewTaskChange('rewardDescription', e.target.value)}
+            />
+          ) : (
+            <Input
+              type="number"
+              placeholder="Сумма"
+              value={newTask.rewardAmount}
+              onChange={(e) => onNewTaskChange('rewardAmount', Number(e.target.value))}
+            />
+          )}
           <div className="flex gap-2">
             <Button size="sm" onClick={() => onCreateTask(section.id)} disabled={!newTask.title.trim()}>
               Создать

@@ -25,21 +25,23 @@ export const TaskCard = ({
   handleDeleteTask,
   handleUncompleteTask,
 }: TaskCardProps) => {
-  const category = getCategoryById(task.category);
   const project = projects.find(p => p.id === task.projectId);
   const section = project?.sections.find(s => s.id === task.sectionId);
+  
+  const priorityConfig = {
+    low: { emoji: '🔵', label: 'Низкий' },
+    medium: { emoji: '🟡', label: 'Средний' },
+    high: { emoji: '🔴', label: 'Высокий' },
+  };
 
   return (
     <Card key={task.id} className="p-4 hover:shadow-md transition-all">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
-            {category && (
-              <Badge variant="secondary" className={`${category.color} text-white gap-1`}>
-                <Icon name={category.icon} size={14} />
-                {category.name}
-              </Badge>
-            )}
+            <Badge variant="secondary" className="gap-1">
+              {priorityConfig[task.priority].emoji} {priorityConfig[task.priority].label}
+            </Badge>
             {showProject && project && (
               <Badge variant="outline" className="gap-1">
                 <Icon name={project.icon} size={14} />
@@ -63,9 +65,18 @@ export const TaskCard = ({
                 {format(task.scheduledDate, 'd MMM', { locale: ru })}
               </span>
             )}
-            <Badge variant="outline" className="gap-1">
-              <Icon name={task.rewardType === 'points' ? 'Star' : task.rewardType === 'minutes' ? 'Clock' : 'DollarSign'} size={14} />
-              {task.rewardAmount} {task.rewardType === 'points' ? 'баллов' : task.rewardType === 'minutes' ? 'мин' : '₽'}
+            <Badge variant="outline" className="gap-1 bg-red-500/10 text-red-600 border-red-300">
+              {task.rewardType === 'prize' ? (
+                <>
+                  <Icon name="Gift" size={14} />
+                  {task.rewardDescription || 'Приз'}
+                </>
+              ) : (
+                <>
+                  <Icon name={task.rewardType === 'points' ? 'Star' : task.rewardType === 'minutes' ? 'Clock' : 'DollarSign'} size={14} />
+                  {task.rewardAmount} {task.rewardType === 'points' ? 'баллов' : task.rewardType === 'minutes' ? 'мин' : '₽'}
+                </>
+              )}
             </Badge>
           </div>
         </div>

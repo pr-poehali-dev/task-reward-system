@@ -1,4 +1,5 @@
-export type RewardType = 'points' | 'minutes' | 'rubles';
+export type RewardType = 'points' | 'minutes' | 'rubles' | 'prize';
+export type Priority = 'low' | 'medium' | 'high';
 export type ViewMode = 'list' | 'board';
 export type SidebarView = 'projects' | 'search' | 'completed' | 'categories' | 'rewards' | 'history';
 
@@ -28,15 +29,15 @@ export interface Task {
   id: string;
   title: string;
   description: string;
-  category: string;
+  priority: Priority;
   rewardType: RewardType;
   rewardAmount: number;
+  rewardDescription?: string;
   completed: boolean;
   createdAt: Date;
   scheduledDate?: Date;
   projectId: string;
   sectionId?: string;
-  priority: 1 | 2 | 3 | 4;
 }
 
 export interface ActivityLog {
