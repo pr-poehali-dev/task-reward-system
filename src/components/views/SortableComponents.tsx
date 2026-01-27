@@ -95,7 +95,7 @@ export const SortableTask = ({ task, onEdit, onComplete, onDelete }: SortableTas
           <div className="flex items-center justify-between mb-1">
             <h4 className="font-medium">{task.title}</h4>
             <Badge variant="outline" className="text-xs">
-              {task.priority === 'low' ? '🔵' : task.priority === 'high' ? '🔴' : '🟡'}
+              {task.priority === 3 ? '🔵' : task.priority === 1 ? '🔴' : '🟡'}
             </Badge>
           </div>
           {task.description && (
@@ -103,11 +103,7 @@ export const SortableTask = ({ task, onEdit, onComplete, onDelete }: SortableTas
           )}
           <div className="flex items-center justify-between">
             <Badge variant="secondary" className="text-xs bg-red-500/10 text-red-600 border-red-300">
-              {task.rewardType === 'prize' ? (
-                `🎁 ${task.rewardDescription || 'Приз'}`
-              ) : (
-                `${task.rewardType === 'points' ? '⭐' : task.rewardType === 'minutes' ? '⏱️' : '💰'} ${task.rewardAmount}`
-              )}
+              {task.rewardType === 'points' ? '⭐' : task.rewardType === 'minutes' ? '⏱️' : '💰'} {task.rewardAmount}
             </Badge>
             <div className="flex gap-1">
               <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); onComplete(task.id); }}>
