@@ -243,6 +243,7 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
   }
 
   if (viewType === 'rewards') {
+    console.log('[CategoriesRewardsView] Rendering rewards:', earnedRewards);
     const [editingReward, setEditingReward] = useState<RewardType | null>(null);
     const [editValue, setEditValue] = useState('');
 

@@ -177,6 +177,7 @@ export const useTaskManager = (token: string) => {
   }, [activityLog, isInitialLoad]);
 
   useEffect(() => {
+    console.log('[useTaskManager] earnedRewards changed:', earnedRewards);
     localStorage.setItem('earnedRewards', JSON.stringify(earnedRewards));
     if (!isInitialLoad) {
       setHasUnsyncedChanges(true);
@@ -410,15 +411,32 @@ export const useTaskManager = (token: string) => {
     const task = tasks.find(t => t.id === taskId);
     if (!task || !task.completed) return;
 
+    console.log('[handleUncompleteTask] Before:', { 
+      taskId, 
+      rewardType: task.rewardType, 
+      rewardAmount: task.rewardAmount,
+      currentRewards: earnedRewards 
+    });
+
     setTasks(tasks.map(t => {
       if (t.id === taskId) {
         const rewardText = t.rewardType === 'points' ? 'баллов' : t.rewardType === 'minutes' ? 'минут' : t.rewardType === 'rubles' ? 'рублей' : 'приз';
         
         if (t.rewardType !== 'prize') {
-          setEarnedRewards(prev => ({
-            ...prev,
-            [t.rewardType]: prev[t.rewardType] - t.rewardAmount,
-          }));
+          setEarnedRewards(prev => {
+            const newValue = prev[t.rewardType] - t.rewardAmount;
+            console.log('[handleUncompleteTask] Updating rewards:', {
+              rewardType: t.rewardType,
+              prevValue: prev[t.rewardType],
+              rewardAmount: t.rewardAmount,
+              newValue,
+              fullPrev: prev
+            });
+            return {
+              ...prev,
+              [t.rewardType]: newValue,
+            };
+          });
         }
         
         const sign = t.rewardAmount >= 0 ? '-' : '+';
