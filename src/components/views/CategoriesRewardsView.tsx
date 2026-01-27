@@ -252,8 +252,10 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
     };
 
     const handleRewardSave = (type: RewardType) => {
-      const numValue = parseInt(editValue) || 0;
-      props.setEarnedRewards?.((prev: EarnedRewards) => ({ ...prev, [type]: Math.max(0, numValue) }));
+      const numValue = parseInt(editValue);
+      if (!isNaN(numValue)) {
+        props.setEarnedRewards?.((prev: EarnedRewards) => ({ ...prev, [type]: numValue }));
+      }
       setEditingReward(null);
     };
 
