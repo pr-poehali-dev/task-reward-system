@@ -21,8 +21,10 @@ const RewardCard = ({ type, label, value, onChange }: RewardCardProps) => {
   const [inputValue, setInputValue] = useState(value.toString());
 
   const handleBlur = () => {
-    const numValue = parseInt(inputValue) || 0;
-    onChange(numValue);
+    const numValue = parseInt(inputValue);
+    if (!isNaN(numValue)) {
+      onChange(numValue);
+    }
     setIsEditing(false);
   };
 
