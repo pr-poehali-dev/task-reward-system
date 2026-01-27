@@ -303,7 +303,7 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
         </div>
         
         <div className="grid gap-4 grid-cols-3 mb-6">
-          {earnedRewards.points > 0 && (
+          {earnedRewards.points !== 0 && (
             <Card className="p-6 text-center hover:shadow-lg transition-all">
               <Icon name="Star" size={32} className="mx-auto mb-2 text-yellow-500" />
               {editingReward === 'points' ? (
@@ -315,7 +315,6 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
                   onKeyDown={(e) => handleRewardKeyDown(e, 'points')}
                   autoFocus
                   className="text-3xl font-bold text-center h-14 mb-2"
-                  min="0"
                 />
               ) : (
                 <p 
@@ -328,7 +327,7 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
               <p className="text-sm text-muted-foreground">Баллов заработано</p>
             </Card>
           )}
-          {earnedRewards.minutes > 0 && (
+          {earnedRewards.minutes !== 0 && (
             <Card className="p-6 text-center hover:shadow-lg transition-all">
               <Icon name="Clock" size={32} className="mx-auto mb-2 text-blue-500" />
               {editingReward === 'minutes' ? (
@@ -340,7 +339,6 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
                   onKeyDown={(e) => handleRewardKeyDown(e, 'minutes')}
                   autoFocus
                   className="text-3xl font-bold text-center h-14 mb-2"
-                  min="0"
                 />
               ) : (
                 <p 
@@ -353,7 +351,7 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
               <p className="text-sm text-muted-foreground">Минут заработано</p>
             </Card>
           )}
-          {earnedRewards.rubles > 0 && (
+          {earnedRewards.rubles !== 0 && (
             <Card className="p-6 text-center hover:shadow-lg transition-all">
               <Icon name="DollarSign" size={32} className="mx-auto mb-2 text-green-500" />
               {editingReward === 'rubles' ? (
@@ -365,7 +363,6 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
                   onKeyDown={(e) => handleRewardKeyDown(e, 'rubles')}
                   autoFocus
                   className="text-3xl font-bold text-center h-14 mb-2"
-                  min="0"
                 />
               ) : (
                 <p 
