@@ -22,7 +22,7 @@ const RewardCard = ({ type, label, value, onChange }: RewardCardProps) => {
 
   const handleBlur = () => {
     const numValue = parseInt(inputValue) || 0;
-    onChange(Math.max(0, numValue));
+    onChange(numValue);
     setIsEditing(false);
   };
 
@@ -47,7 +47,6 @@ const RewardCard = ({ type, label, value, onChange }: RewardCardProps) => {
             onKeyDown={handleKeyDown}
             autoFocus
             className="text-2xl font-bold text-center h-10 w-20"
-            min="0"
           />
         ) : (
           <div
@@ -65,7 +64,7 @@ const RewardCard = ({ type, label, value, onChange }: RewardCardProps) => {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => onChange(Math.max(0, value - 1))}
+            onClick={() => onChange(value - 1)}
           >
             <Icon name="Minus" size={14} />
           </Button>
