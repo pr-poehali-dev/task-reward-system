@@ -51,33 +51,18 @@ const TaskEditDialog = ({
               rows={3}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Категория</label>
-              <Select value={editForm.category} onValueChange={(v) => onFormChange('category', v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите категорию" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(cat => (
-                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Приоритет</label>
-              <Select value={String(editForm.priority || 2)} onValueChange={(v) => onFormChange('priority', Number(v))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">P1 - Высокий</SelectItem>
-                  <SelectItem value="2">P2 - Средний</SelectItem>
-                  <SelectItem value="3">P3 - Низкий</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div>
+            <label className="text-sm font-medium">Приоритет</label>
+            <Select value={String(editForm.priority || 2)} onValueChange={(v) => onFormChange('priority', Number(v))}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">P1 - Высокий</SelectItem>
+                <SelectItem value="2">P2 - Средний</SelectItem>
+                <SelectItem value="3">P3 - Низкий</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -99,7 +84,6 @@ const TaskEditDialog = ({
                 type="number"
                 value={editForm.rewardAmount || 0}
                 onChange={(e) => onFormChange('rewardAmount', Number(e.target.value))}
-                min={0}
               />
             </div>
           </div>

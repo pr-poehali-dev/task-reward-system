@@ -48,7 +48,6 @@ export const TaskSidebar = ({
   return (
     <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-card border-r border-border transition-all duration-300 flex flex-col`}>
       <div className="p-4 border-b border-border flex items-center justify-between">
-        {sidebarOpen && <h2 className="font-semibold text-foreground">Меню</h2>}
         <Button
           variant="ghost"
           size="sm"

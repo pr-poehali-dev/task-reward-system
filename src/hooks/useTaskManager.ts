@@ -381,7 +381,8 @@ export const useTaskManager = (token: string) => {
     setTasks(tasks.map(t => {
       if (t.id === taskId) {
         const rewardText = t.rewardType === 'points' ? 'баллов' : t.rewardType === 'minutes' ? 'минут' : t.rewardType === 'rubles' ? 'рублей' : 'приз';
-        const rewardDisplay = t.rewardType === 'prize' ? t.rewardDescription || 'приз' : `+${t.rewardAmount} ${rewardText}`;
+        const sign = t.rewardAmount >= 0 ? '+' : '';
+        const rewardDisplay = t.rewardType === 'prize' ? t.rewardDescription || 'приз' : `${sign}${t.rewardAmount} ${rewardText}`;
         toast.success(rewardDisplay, {
           description: t.title,
         });
@@ -395,7 +396,7 @@ export const useTaskManager = (token: string) => {
         
         addActivityLog(
           'Выполнение задачи', 
-          `Задача "${t.title}" выполнена. Получено: +${t.rewardAmount} ${rewardText}`,
+          `Задача "${t.title}" выполнена. Получено: ${sign}${t.rewardAmount} ${rewardText}`,
           { type: 'task_complete', data: { taskId: t.id } }
         );
         
