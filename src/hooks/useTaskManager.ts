@@ -417,11 +417,12 @@ export const useTaskManager = (token: string) => {
         if (t.rewardType !== 'prize') {
           setEarnedRewards(prev => ({
             ...prev,
-            [t.rewardType]: Math.max(0, prev[t.rewardType] - t.rewardAmount),
+            [t.rewardType]: prev[t.rewardType] - t.rewardAmount,
           }));
         }
         
-        addActivityLog('Возврат задачи', `Задача "${t.title}" возвращена в активные. Списано: -${t.rewardAmount} ${rewardText}`);
+        const sign = t.rewardAmount >= 0 ? '-' : '+';
+        addActivityLog('Возврат задачи', `Задача "${t.title}" возвращена в активные. Списано: ${sign}${Math.abs(t.rewardAmount)} ${rewardText}`);
         toast.info(`Задача возвращена в активные`, { description: t.title });
         
         return { ...t, completed: false };
