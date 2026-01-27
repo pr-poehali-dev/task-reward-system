@@ -114,6 +114,7 @@ interface CategoriesRewardsViewProps {
   handleAddManualReward: () => void;
   handleUndoAction: (logId: string) => void;
   setEarnedRewards?: (rewards: EarnedRewards | ((prev: EarnedRewards) => EarnedRewards)) => void;
+  addActivityLog?: (action: string, description: string, undoData?: any) => void;
 }
 
 export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
@@ -243,7 +244,6 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
   }
 
   if (viewType === 'rewards') {
-    console.log('[CategoriesRewardsView] Rendering rewards:', earnedRewards);
     const [editingReward, setEditingReward] = useState<RewardType | null>(null);
     const [editValue, setEditValue] = useState('');
 
@@ -255,7 +255,18 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
     const handleRewardSave = (type: RewardType) => {
       const numValue = parseInt(editValue);
       if (!isNaN(numValue)) {
-        props.setEarnedRewards?.((prev: EarnedRewards) => ({ ...prev, [type]: numValue }));
+        const rewardLabels = { points: 'баллов', minutes: 'минут', rubles: 'рублей' };
+        props.setEarnedRewards?.((prev: EarnedRewards) => {
+          const oldValue = prev[type];
+          const diff = numValue - oldValue;
+          const sign = diff >= 0 ? '+' : '';
+          props.addActivityLog?.(
+            'Изменение наград',
+            `${rewardLabels[type]}: ${oldValue} → ${numValue} (${sign}${diff})`,
+            { type: 'reward_change', data: { rewardType: type, previousValue: oldValue, newValue: numValue } }
+          );
+          return { ...prev, [type]: numValue };
+        });
       }
       setEditingReward(null);
     };
@@ -287,13 +298,26 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
                 <div className="grid grid-cols-3 gap-3">
                   {(['points', 'minutes', 'rubles'] as RewardType[]).map((type) => {
                     const labels = { points: 'Баллы', minutes: 'Минуты', rubles: 'Рубли' };
+                    const rewardLabels = { points: 'баллов', minutes: 'минут', rubles: 'рублей' };
                     return (
                       <RewardCard
                         key={type}
                         type={type}
                         label={labels[type]}
                         value={earnedRewards[type]}
-                        onChange={(newValue) => props.setEarnedRewards?.((prev: EarnedRewards) => ({ ...prev, [type]: newValue }))}
+                        onChange={(newValue) => {
+                          props.setEarnedRewards?.((prev: EarnedRewards) => {
+                            const oldValue = prev[type];
+                            const diff = newValue - oldValue;
+                            const sign = diff >= 0 ? '+' : '';
+                            props.addActivityLog?.(
+                              'Изменение наград',
+                              `${rewardLabels[type]}: ${oldValue} → ${newValue} (${sign}${diff})`,
+                              { type: 'reward_change', data: { rewardType: type, previousValue: oldValue, newValue: newValue } }
+                            );
+                            return { ...prev, [type]: newValue };
+                          });
+                        }}
                       />
                     );
                   })}

@@ -177,7 +177,6 @@ export const useTaskManager = (token: string) => {
   }, [activityLog, isInitialLoad]);
 
   useEffect(() => {
-    console.log('[useTaskManager] earnedRewards changed:', earnedRewards);
     localStorage.setItem('earnedRewards', JSON.stringify(earnedRewards));
     if (!isInitialLoad) {
       setHasUnsyncedChanges(true);
@@ -320,7 +319,11 @@ export const useTaskManager = (token: string) => {
         break;
       
       case 'reward_change':
-        setEarnedRewards(data.previousRewards);
+        if (data.previousRewards) {
+          setEarnedRewards(data.previousRewards);
+        } else if (data.rewardType && data.previousValue !== undefined) {
+          setEarnedRewards(prev => ({ ...prev, [data.rewardType]: data.previousValue }));
+        }
         toast.success('Награды восстановлены');
         break;
     }
@@ -411,13 +414,6 @@ export const useTaskManager = (token: string) => {
     const task = tasks.find(t => t.id === taskId);
     if (!task || !task.completed) return;
 
-    console.log('[handleUncompleteTask] Before:', { 
-      taskId, 
-      rewardType: task.rewardType, 
-      rewardAmount: task.rewardAmount,
-      currentRewards: earnedRewards 
-    });
-
     setTasks(tasks.map(t => {
       if (t.id === taskId) {
         const rewardText = t.rewardType === 'points' ? 'баллов' : t.rewardType === 'minutes' ? 'минут' : t.rewardType === 'rubles' ? 'рублей' : 'приз';
@@ -425,13 +421,6 @@ export const useTaskManager = (token: string) => {
         if (t.rewardType !== 'prize') {
           setEarnedRewards(prev => {
             const newValue = prev[t.rewardType] - t.rewardAmount;
-            console.log('[handleUncompleteTask] Updating rewards:', {
-              rewardType: t.rewardType,
-              prevValue: prev[t.rewardType],
-              rewardAmount: t.rewardAmount,
-              newValue,
-              fullPrev: prev
-            });
             return {
               ...prev,
               [t.rewardType]: newValue,
@@ -751,5 +740,6 @@ export const useTaskManager = (token: string) => {
     setEarnedRewards,
     setProjects,
     setTasks,
+    addActivityLog,
   };
 };

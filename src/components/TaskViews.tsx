@@ -84,6 +84,7 @@ interface TaskViewsProps {
   setEarnedRewards?: (rewards: EarnedRewards | ((prev: EarnedRewards) => EarnedRewards)) => void;
   setProjects?: (projects: Project[]) => void;
   setTasks: (tasks: Task[]) => void;
+  addActivityLog?: (action: string, description: string, undoData?: any) => void;
 }
 
 export const TaskViews = (props: TaskViewsProps) => {
@@ -159,6 +160,7 @@ export const TaskViews = (props: TaskViewsProps) => {
         handleAddManualReward={props.handleAddManualReward}
         handleUndoAction={props.handleUndoAction}
         setEarnedRewards={props.setEarnedRewards}
+        addActivityLog={props.addActivityLog}
       />
     );
   }

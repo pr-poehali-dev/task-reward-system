@@ -200,6 +200,7 @@ const Index = ({ user, token, onLogout }: IndexProps) => {
             setEarnedRewards={manager.setEarnedRewards}
             setProjects={manager.setProjects}
             setTasks={manager.setTasks}
+            addActivityLog={manager.addActivityLog}
           />
         </div>
       </div>
