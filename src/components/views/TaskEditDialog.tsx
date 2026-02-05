@@ -58,9 +58,9 @@ const TaskEditDialog = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">P1 - Высокий</SelectItem>
-                <SelectItem value="2">P2 - Средний</SelectItem>
-                <SelectItem value="3">P3 - Низкий</SelectItem>
+                <SelectItem value="1">🔴 Высокий</SelectItem>
+                <SelectItem value="2">🟡 Средний</SelectItem>
+                <SelectItem value="3">🔵 Низкий</SelectItem>
               </SelectContent>
             </Select>
           </div>

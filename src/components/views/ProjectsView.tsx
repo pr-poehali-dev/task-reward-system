@@ -29,6 +29,7 @@ interface ProjectsViewProps {
     title: string;
     description: string;
     category: string;
+    priority: number;
     rewardType: RewardType;
     rewardAmount: number;
     sectionId: string;

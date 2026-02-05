@@ -24,6 +24,7 @@ interface SectionCardProps {
     title: string;
     description: string;
     category: string;
+    priority: number;
     rewardType: RewardType;
     rewardAmount: number;
     sectionId: string;
@@ -179,27 +180,33 @@ const SectionCard = ({
             rows={2}
           />
           <div className="grid grid-cols-2 gap-2">
-            <Select value={newTask.priority} onValueChange={(v) => onNewTaskChange('priority', v)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Приоритет" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">🔵 Низкий</SelectItem>
-                <SelectItem value="medium">🟡 Средний</SelectItem>
-                <SelectItem value="high">🔴 Высокий</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={newTask.rewardType} onValueChange={(v) => onNewTaskChange('rewardType', v)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Награда" />
-              </SelectTrigger>
+            <div>
+              <label className="text-xs font-medium mb-1 block">Приоритет</label>
+              <Select value={String(newTask.priority)} onValueChange={(v) => onNewTaskChange('priority', Number(v))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">🔴 Высокий</SelectItem>
+                  <SelectItem value="2">🟡 Средний</SelectItem>
+                  <SelectItem value="3">🔵 Низкий</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs font-medium mb-1 block">Награда</label>
+              <Select value={newTask.rewardType} onValueChange={(v) => onNewTaskChange('rewardType', v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
               <SelectContent>
                 <SelectItem value="points">⭐ Баллы</SelectItem>
                 <SelectItem value="minutes">⏱️ Минуты</SelectItem>
                 <SelectItem value="rubles">💰 Рубли</SelectItem>
                 <SelectItem value="prize">🎁 Приз</SelectItem>
               </SelectContent>
-            </Select>
+              </Select>
+            </div>
           </div>
           {newTask.rewardType === 'prize' ? (
             <Input

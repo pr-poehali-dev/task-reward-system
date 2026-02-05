@@ -16,6 +16,7 @@ interface NoSectionTasksCardProps {
     title: string;
     description: string;
     category: string;
+    priority: number;
     rewardType: RewardType;
     rewardAmount: number;
     sectionId: string;
@@ -81,27 +82,48 @@ const NoSectionTasksCard = ({
             onChange={(e) => onNewTaskChange({ ...newTask, description: e.target.value })}
             rows={2}
           />
-          <div className="grid grid-cols-2 gap-2">
-            <Select value={newTask.category} onValueChange={(v) => onNewTaskChange({ ...newTask, category: v })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Категория" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map(cat => (
-                  <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={newTask.rewardType} onValueChange={(v) => onNewTaskChange({ ...newTask, rewardType: v as RewardType })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Награда" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="points">⭐ Баллы</SelectItem>
-                <SelectItem value="minutes">⏱️ Минуты</SelectItem>
-                <SelectItem value="money">💰 Деньги</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="space-y-2">
+            <div>
+              <label className="text-xs font-medium mb-1 block">Приоритет</label>
+              <Select value={String(newTask.priority)} onValueChange={(v) => onNewTaskChange({ ...newTask, priority: Number(v) })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">🔴 Высокий</SelectItem>
+                  <SelectItem value="2">🟡 Средний</SelectItem>
+                  <SelectItem value="3">🔵 Низкий</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-xs font-medium mb-1 block">Категория</label>
+                <Select value={newTask.category} onValueChange={(v) => onNewTaskChange({ ...newTask, category: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(cat => (
+                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1 block">Награда</label>
+                <Select value={newTask.rewardType} onValueChange={(v) => onNewTaskChange({ ...newTask, rewardType: v as RewardType })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="points">⭐ Баллы</SelectItem>
+                    <SelectItem value="minutes">⏱️ Минуты</SelectItem>
+                    <SelectItem value="money">💰 Деньги</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
           <Input
             type="number"
