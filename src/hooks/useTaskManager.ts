@@ -12,7 +12,7 @@ export const useTaskManager = (token: string) => {
         ...t,
         createdAt: new Date(t.createdAt),
         scheduledDate: t.scheduledDate ? new Date(t.scheduledDate) : undefined,
-        priority: t.priority || 'medium' as Priority,
+        priority: t.priority || 2 as Priority,
       }));
     }
     return [];
@@ -90,7 +90,7 @@ export const useTaskManager = (token: string) => {
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
-    priority: 'medium' as Priority,
+    priority: 2 as Priority,
     rewardType: 'minutes' as RewardType,
     rewardAmount: 10,
     rewardDescription: '',
@@ -244,7 +244,7 @@ export const useTaskManager = (token: string) => {
             ...t,
             createdAt: new Date(t.created_at),
             scheduledDate: t.scheduled_date ? new Date(t.scheduled_date) : undefined,
-            priority: t.priority || 'medium' as Priority,
+            priority: t.priority || 2 as Priority,
           }));
           setTasks(parsedTasks);
         }
@@ -363,7 +363,7 @@ export const useTaskManager = (token: string) => {
     setNewTask({
       title: '',
       description: '',
-      priority: 'medium',
+      priority: 2,
       rewardType: 'minutes',
       rewardAmount: 10,
       rewardDescription: '',

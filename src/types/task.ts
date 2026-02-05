@@ -1,5 +1,5 @@
 export type RewardType = 'points' | 'minutes' | 'rubles' | 'prize';
-export type Priority = 'low' | 'medium' | 'high';
+export type Priority = 1 | 2 | 3;
 export type ViewMode = 'list' | 'board';
 export type SidebarView = 'projects' | 'search' | 'completed' | 'categories' | 'rewards' | 'history';
 
