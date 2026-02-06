@@ -431,11 +431,11 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
                   <div className="flex-1">
                     <h3 className="font-semibold text-sm mb-1">{log.action}</h3>
                     <p className="text-sm text-muted-foreground">{log.description}</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1">
+                      {format(log.timestamp, 'd MMMM yyyy, HH:mm', { locale: ru })}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">
-                      {format(log.timestamp, 'HH:mm', { locale: ru })}
-                    </span>
                     {log.undoData && (
                       <Button
                         variant="ghost"
