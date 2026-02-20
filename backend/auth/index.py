@@ -212,6 +212,7 @@ def verify_token(token: str) -> int | None:
         secret = os.environ.get('JWT_SECRET', 'default-secret-change-in-production')
         payload, signature = token.rsplit(':', 1)
         expected_signature = hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
+
         
         if not hmac.compare_digest(signature, expected_signature):
             return None
