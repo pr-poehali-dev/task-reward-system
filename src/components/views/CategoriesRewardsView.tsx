@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Icon from '@/components/ui/icon';
-import { format } from 'date-fns';
+import { format, isToday, isYesterday, startOfDay } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { Task, Category, ActivityLog, EarnedRewards, RewardType } from '@/types/task';
 import { ICONS_LIST, COLORS_LIST } from '@/types/task';
@@ -413,46 +413,67 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
   }
 
   if (viewType === 'history') {
-    console.log('Activity log:', activityLog.map(l => ({ id: l.id, action: l.action, hasUndo: !!l.undoData })));
-    
+    const groupedLogs = activityLog.reduce((groups: Record<string, ActivityLog[]>, log) => {
+      const dayKey = startOfDay(new Date(log.timestamp)).toISOString();
+      if (!groups[dayKey]) groups[dayKey] = [];
+      groups[dayKey].push(log);
+      return groups;
+    }, {});
+
+    const sortedDays = Object.keys(groupedLogs).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+    const getDayLabel = (isoKey: string) => {
+      const date = new Date(isoKey);
+      if (isToday(date)) return 'Сегодня';
+      if (isYesterday(date)) return 'Вчера';
+      return format(date, 'd MMMM yyyy', { locale: ru });
+    };
+
     return (
       <div>
         <h2 className="text-xl font-semibold mb-4">Журнал действий</h2>
-        <div className="space-y-2">
-          {activityLog.length === 0 ? (
-            <Card className="p-8 text-center">
-              <Icon name="History" size={48} className="mx-auto mb-3 text-muted-foreground" />
-              <p className="text-muted-foreground">История действий пуста</p>
-            </Card>
-          ) : (
-            activityLog.map(log => (
-              <Card key={log.id} className="p-4 hover:shadow-md transition-all">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-sm mb-1">{log.action}</h3>
-                    <p className="text-sm text-muted-foreground">{log.description}</p>
-                    <p className="text-xs text-muted-foreground/60 mt-1">
-                      {format(log.timestamp, 'd MMMM yyyy, HH:mm', { locale: ru })}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {log.undoData && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 w-7 p-0"
-                        onClick={() => props.handleUndoAction(log.id)}
-                        title="Отменить действие"
-                      >
-                        <Icon name="Undo2" size={14} />
-                      </Button>
-                    )}
-                  </div>
+        {activityLog.length === 0 ? (
+          <Card className="p-8 text-center">
+            <Icon name="History" size={48} className="mx-auto mb-3 text-muted-foreground" />
+            <p className="text-muted-foreground">История действий пуста</p>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {sortedDays.map(dayKey => (
+              <div key={dayKey}>
+                <h3 className="text-sm font-semibold text-muted-foreground mb-2 px-1">{getDayLabel(dayKey)}</h3>
+                <div className="space-y-2">
+                  {groupedLogs[dayKey].map(log => (
+                    <Card key={log.id} className="p-4 hover:shadow-md transition-all">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-sm mb-1">{log.action}</h3>
+                          <p className="text-sm text-muted-foreground">{log.description}</p>
+                          <p className="text-xs text-muted-foreground/60 mt-1">
+                            {format(new Date(log.timestamp), 'HH:mm', { locale: ru })}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {log.undoData && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0"
+                              onClick={() => props.handleUndoAction(log.id)}
+                              title="Отменить действие"
+                            >
+                              <Icon name="Undo2" size={14} />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
                 </div>
-              </Card>
-            ))
-          )}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
