@@ -8,7 +8,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 
 def handler(event: dict, context) -> dict:
-    '''API для регистрации и авторизации пользователей (v2)'''
+    '''API для регистрации и авторизации пользователей (v3)'''
     
     print(f"[AUTH] Incoming request: method={event.get('httpMethod')}, headers={event.get('headers')}")
     
