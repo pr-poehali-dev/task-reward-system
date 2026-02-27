@@ -172,6 +172,8 @@ const SectionCard = ({
             placeholder="Название задачи"
             value={newTask.title}
             onChange={(e) => onNewTaskChange('title', e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter' && newTask.title.trim()) onCreateTask(section.id); }}
+            autoFocus
           />
           <Textarea
             placeholder="Описание"
