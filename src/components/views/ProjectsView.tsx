@@ -229,12 +229,12 @@ const ProjectsView = (props: ProjectsViewProps) => {
         <SortableContext items={sections.map(s => s.id)} strategy={horizontalListSortingStrategy}>
           <div 
             ref={scrollContainerRef}
-            className="grid gap-4 pb-4 cursor-grab overflow-x-auto"
+            className="flex flex-wrap gap-4 pb-4 cursor-grab"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUpOrLeave}
             onMouseLeave={handleMouseUpOrLeave}
-            style={{ scrollbarWidth: 'thin', gridTemplateColumns: `repeat(${sections.length}, minmax(240px, 1fr))` }}
+            style={{ scrollbarWidth: 'thin' }}
           >
             {sections.sort((a, b) => (a.order || 0) - (b.order || 0)).map(section => {
               const sectionTasks = activeTasks.filter(t => t.sectionId === section.id);
