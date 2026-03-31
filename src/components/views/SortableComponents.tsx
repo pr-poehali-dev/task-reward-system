@@ -93,7 +93,7 @@ export const SortableTask = ({ task, onEdit, onComplete, onDelete }: SortableTas
       <div className="flex items-center gap-2">
         <div className="flex-1">
           <div className="flex items-center justify-between mb-1">
-            <h4 className="font-medium">{task.title}</h4>
+            <h4 className="font-normal">{task.title}</h4>
             <Badge variant="outline" className="text-xs">
               {task.priority === 3 ? '🔵' : task.priority === 1 ? '🔴' : '🟡'}
             </Badge>
