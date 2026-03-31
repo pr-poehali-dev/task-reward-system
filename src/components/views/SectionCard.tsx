@@ -87,7 +87,7 @@ const SectionCard = ({
     }
   };
   return (
-    <Card className={`flex-shrink-0 w-80 p-4 flex flex-col section-card-content transition-all ${isOver ? 'ring-2 ring-primary shadow-lg scale-105' : ''}`} style={{ maxHeight: 'calc(100vh - 200px)' }}>
+    <Card className={`w-full min-w-0 p-4 flex flex-col section-card-content transition-all ${isOver ? 'ring-2 ring-primary shadow-lg scale-105' : ''}`} style={{ maxHeight: 'calc(100vh - 200px)' }}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {isEditingName ? (
