@@ -229,7 +229,7 @@ const ProjectsView = (props: ProjectsViewProps) => {
         <SortableContext items={sections.map(s => s.id)} strategy={horizontalListSortingStrategy}>
           <div 
             ref={scrollContainerRef}
-            className="flex flex-wrap gap-4 pb-4 cursor-grab"
+            className="flex gap-4 pb-4 cursor-grab overflow-x-auto"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUpOrLeave}
