@@ -413,7 +413,38 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
   }
 
   if (viewType === 'history') {
-    const groupedLogs = activityLog.reduce((groups: Record<string, ActivityLog[]>, log) => {
+    const [hiddenTypes, setHiddenTypes] = useState<Set<'created' | 'completed' | 'deleted'>>(() => {
+      const saved = localStorage.getItem('historyHiddenTypes');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    });
+
+    const toggleHiddenType = (type: 'created' | 'completed' | 'deleted') => {
+      setHiddenTypes(prev => {
+        const next = new Set(prev);
+        if (next.has(type)) {
+          next.delete(type);
+        } else {
+          next.add(type);
+        }
+        localStorage.setItem('historyHiddenTypes', JSON.stringify(Array.from(next)));
+        return next;
+      });
+    };
+
+    const getLogCategory = (log: ActivityLog): 'created' | 'completed' | 'deleted' | null => {
+      const undoType = log.undoData?.type;
+      if (undoType === 'task_create') return 'created';
+      if (undoType === 'task_complete') return 'completed';
+      if (undoType === 'task_delete' || undoType === 'category_delete' || undoType === 'project_delete' || undoType === 'section_delete') return 'deleted';
+      return null;
+    };
+
+    const visibleLogs = activityLog.filter(log => {
+      const category = getLogCategory(log);
+      return !category || !hiddenTypes.has(category);
+    });
+
+    const groupedLogs = visibleLogs.reduce((groups: Record<string, ActivityLog[]>, log) => {
       const dayKey = startOfDay(new Date(log.timestamp)).toISOString();
       if (!groups[dayKey]) groups[dayKey] = [];
       groups[dayKey].push(log);
@@ -439,13 +470,40 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
       return { icon: 'Circle', color: 'text-muted-foreground', border: '' };
     };
 
+    const filterOptions: { type: 'created' | 'completed' | 'deleted'; label: string; icon: string }[] = [
+      { type: 'created', label: 'Созданные', icon: 'PlusCircle' },
+      { type: 'completed', label: 'Выполненные', icon: 'CheckCircle2' },
+      { type: 'deleted', label: 'Удалённые', icon: 'Trash2' },
+    ];
+
     return (
       <div>
-        <h2 className="text-xl font-semibold mb-4">Журнал действий</h2>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <h2 className="text-xl font-semibold">Журнал действий</h2>
+          <div className="flex items-center gap-2 flex-wrap">
+            {filterOptions.map(opt => (
+              <Button
+                key={opt.type}
+                variant={hiddenTypes.has(opt.type) ? 'outline' : 'secondary'}
+                size="sm"
+                className="gap-1.5"
+                onClick={() => toggleHiddenType(opt.type)}
+              >
+                <Icon name={hiddenTypes.has(opt.type) ? 'EyeOff' : opt.icon} size={14} />
+                {opt.label}
+              </Button>
+            ))}
+          </div>
+        </div>
         {activityLog.length === 0 ? (
           <Card className="p-8 text-center">
             <Icon name="History" size={48} className="mx-auto mb-3 text-muted-foreground" />
             <p className="text-muted-foreground">История действий пуста</p>
+          </Card>
+        ) : visibleLogs.length === 0 ? (
+          <Card className="p-8 text-center">
+            <Icon name="EyeOff" size={48} className="mx-auto mb-3 text-muted-foreground" />
+            <p className="text-muted-foreground">Все записи скрыты фильтрами</p>
           </Card>
         ) : (
           <div className="space-y-6">
