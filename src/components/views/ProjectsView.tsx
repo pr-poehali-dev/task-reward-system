@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import Icon from '@/components/ui/icon';
-import type { Task, Category, Project, RewardType } from '@/types/task';
+import type { Task, Category, Project, RewardType, EarnedRewards } from '@/types/task';
 import { SortableSection } from './SortableComponents';
 import TaskEditDialog from './TaskEditDialog';
 import SectionCard from './SectionCard';
@@ -44,6 +44,7 @@ interface ProjectsViewProps {
   setProjects?: (projects: Project[]) => void;
   setSelectedProjectId?: (id: string) => void;
   setTasks: (tasks: Task[]) => void;
+  earnedRewards?: EarnedRewards;
 }
 
 const ProjectsView = (props: ProjectsViewProps) => {
@@ -62,6 +63,7 @@ const ProjectsView = (props: ProjectsViewProps) => {
     handleCreateTask,
     handleCreateSection,
     handleDeleteSection,
+    earnedRewards,
     handleCompleteTask,
     handleDeleteTask,
     setProjects,
@@ -199,10 +201,34 @@ const ProjectsView = (props: ProjectsViewProps) => {
           <h2 className="text-2xl font-bold">{selectedProject?.name || 'Проекты'}</h2>
           <p className="text-muted-foreground">Управление задачами по разделам</p>
         </div>
-        <Button onClick={() => setIsSectionDialogOpen(true)}>
-          <Icon name="Plus" size={16} className="mr-2" />
-          Добавить раздел
-        </Button>
+        <div className="flex items-center gap-2">
+          {earnedRewards && (
+            <div className="flex items-center gap-1.5">
+              {earnedRewards.points !== 0 && (
+                <Badge variant="outline" className={`gap-1 ${earnedRewards.points < 0 ? 'text-red-600 border-red-300 bg-red-500/10' : 'text-amber-600 border-amber-300 bg-amber-500/10'}`}>
+                  <Icon name="Star" size={12} />
+                  {earnedRewards.points}
+                </Badge>
+              )}
+              {earnedRewards.minutes !== 0 && (
+                <Badge variant="outline" className={`gap-1 ${earnedRewards.minutes < 0 ? 'text-red-600 border-red-300 bg-red-500/10' : 'text-blue-600 border-blue-300 bg-blue-500/10'}`}>
+                  <Icon name="Clock" size={12} />
+                  {earnedRewards.minutes}
+                </Badge>
+              )}
+              {earnedRewards.rubles !== 0 && (
+                <Badge variant="outline" className={`gap-1 ${earnedRewards.rubles < 0 ? 'text-red-600 border-red-300 bg-red-500/10' : 'text-green-600 border-green-300 bg-green-500/10'}`}>
+                  <Icon name="DollarSign" size={12} />
+                  {earnedRewards.rubles}
+                </Badge>
+              )}
+            </div>
+          )}
+          <Button onClick={() => setIsSectionDialogOpen(true)}>
+            <Icon name="Plus" size={16} className="mr-2" />
+            Добавить раздел
+          </Button>
+        </div>
       </div>
 
       <DndContext

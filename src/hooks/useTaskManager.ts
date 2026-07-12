@@ -644,6 +644,8 @@ export const useTaskManager = (token: string) => {
       return;
     }
 
+    const previousRewards = { ...earnedRewards };
+
     setEarnedRewards(prev => ({
       points: prev.points + manualRewards.points,
       minutes: prev.minutes + manualRewards.minutes,
@@ -651,15 +653,19 @@ export const useTaskManager = (token: string) => {
     }));
 
     const rewardDescriptions = [];
-    if (manualRewards.points > 0) rewardDescriptions.push(`+${manualRewards.points} баллов`);
-    if (manualRewards.minutes > 0) rewardDescriptions.push(`+${manualRewards.minutes} минут`);
-    if (manualRewards.rubles > 0) rewardDescriptions.push(`+${manualRewards.rubles} рублей`);
+    if (manualRewards.points !== 0) rewardDescriptions.push(`${manualRewards.points > 0 ? '+' : ''}${manualRewards.points} баллов`);
+    if (manualRewards.minutes !== 0) rewardDescriptions.push(`${manualRewards.minutes > 0 ? '+' : ''}${manualRewards.minutes} минут`);
+    if (manualRewards.rubles !== 0) rewardDescriptions.push(`${manualRewards.rubles > 0 ? '+' : ''}${manualRewards.rubles} рублей`);
 
-    toast.success('Награды добавлены!', {
+    toast.success('Награды обновлены!', {
       description: rewardDescriptions.join(', '),
     });
 
-    addActivityLog('Добавление наград', `Вручную добавлены награды: ${rewardDescriptions.join(', ')}`);
+    addActivityLog(
+      'Изменение наград',
+      `Вручную изменены награды: ${rewardDescriptions.join(', ')}`,
+      { type: 'reward_change', data: { previousRewards } }
+    );
 
     setManualRewards({ points: 0, minutes: 0, rubles: 0 });
     setIsRewardDialogOpen(false);

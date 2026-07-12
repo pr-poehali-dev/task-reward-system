@@ -29,9 +29,9 @@ export const TaskCard = ({
   const section = project?.sections.find(s => s.id === task.sectionId);
   
   const priorityConfig = {
-    low: { emoji: '🔵', label: 'Низкий' },
-    medium: { emoji: '🟡', label: 'Средний' },
-    high: { emoji: '🔴', label: 'Высокий' },
+    1: { emoji: '🔴', label: 'Высокий' },
+    2: { emoji: '🟡', label: 'Средний' },
+    3: { emoji: '🔵', label: 'Низкий' },
   };
 
   return (

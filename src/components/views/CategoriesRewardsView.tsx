@@ -413,12 +413,12 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
   }
 
   if (viewType === 'history') {
-    const [hiddenTypes, setHiddenTypes] = useState<Set<'created' | 'completed' | 'deleted'>>(() => {
+    const [hiddenTypes, setHiddenTypes] = useState<Set<'created' | 'completed' | 'deleted' | 'system'>>(() => {
       const saved = localStorage.getItem('historyHiddenTypes');
       return saved ? new Set(JSON.parse(saved)) : new Set();
     });
 
-    const toggleHiddenType = (type: 'created' | 'completed' | 'deleted') => {
+    const toggleHiddenType = (type: 'created' | 'completed' | 'deleted' | 'system') => {
       setHiddenTypes(prev => {
         const next = new Set(prev);
         if (next.has(type)) {
@@ -431,11 +431,12 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
       });
     };
 
-    const getLogCategory = (log: ActivityLog): 'created' | 'completed' | 'deleted' | null => {
+    const getLogCategory = (log: ActivityLog): 'created' | 'completed' | 'deleted' | 'system' | null => {
       const undoType = log.undoData?.type;
       if (undoType === 'task_create') return 'created';
       if (undoType === 'task_complete') return 'completed';
       if (undoType === 'task_delete' || undoType === 'category_delete' || undoType === 'project_delete' || undoType === 'section_delete') return 'deleted';
+      if (undoType === 'theme_change') return 'system';
       return null;
     };
 
@@ -461,19 +462,35 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
     };
 
     const getLogStyle = (log: ActivityLog) => {
-      if (log.undoData?.type === 'task_create') {
+      const undoType = log.undoData?.type;
+      if (undoType === 'task_create') {
         return { icon: 'PlusCircle', color: 'text-blue-600', border: 'border-l-4 border-l-blue-400' };
       }
-      if (log.undoData?.type === 'task_complete') {
+      if (undoType === 'task_complete') {
         return { icon: 'CheckCircle2', color: 'text-green-600', border: 'border-l-4 border-l-green-400' };
+      }
+      if (undoType === 'task_delete' || undoType === 'category_delete' || undoType === 'project_delete' || undoType === 'section_delete') {
+        return { icon: 'Trash2', color: 'text-red-600', border: 'border-l-4 border-l-red-400' };
+      }
+      if (undoType === 'theme_change') {
+        return { icon: 'Settings', color: 'text-slate-500', border: 'border-l-4 border-l-slate-300' };
+      }
+      if (undoType === 'reward_change') {
+        const prev = log.undoData?.data?.previousValue ?? log.undoData?.data?.previousRewards;
+        const next = log.undoData?.data?.newValue;
+        const isDecrease = typeof prev === 'number' && typeof next === 'number' ? next < prev : false;
+        return isDecrease
+          ? { icon: 'TrendingDown', color: 'text-orange-600', border: 'border-l-4 border-l-orange-400' }
+          : { icon: 'TrendingUp', color: 'text-amber-600', border: 'border-l-4 border-l-amber-400' };
       }
       return { icon: 'Circle', color: 'text-muted-foreground', border: '' };
     };
 
-    const filterOptions: { type: 'created' | 'completed' | 'deleted'; label: string; icon: string }[] = [
+    const filterOptions: { type: 'created' | 'completed' | 'deleted' | 'system'; label: string; icon: string }[] = [
       { type: 'created', label: 'Созданные', icon: 'PlusCircle' },
       { type: 'completed', label: 'Выполненные', icon: 'CheckCircle2' },
       { type: 'deleted', label: 'Удалённые', icon: 'Trash2' },
+      { type: 'system', label: 'Системные', icon: 'Settings' },
     ];
 
     return (

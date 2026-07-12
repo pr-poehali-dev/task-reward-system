@@ -113,6 +113,7 @@ export const TaskViews = (props: TaskViewsProps) => {
         getCategoryById={props.getCategoryById}
         setProjects={props.setProjects}
         setTasks={props.setTasks}
+        earnedRewards={props.earnedRewards}
       />
     );
   }
