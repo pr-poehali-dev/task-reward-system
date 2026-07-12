@@ -429,6 +429,16 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
       return format(date, 'd MMMM yyyy', { locale: ru });
     };
 
+    const getLogStyle = (log: ActivityLog) => {
+      if (log.undoData?.type === 'task_create') {
+        return { icon: 'PlusCircle', color: 'text-blue-600', border: 'border-l-4 border-l-blue-400' };
+      }
+      if (log.undoData?.type === 'task_complete') {
+        return { icon: 'CheckCircle2', color: 'text-green-600', border: 'border-l-4 border-l-green-400' };
+      }
+      return { icon: 'Circle', color: 'text-muted-foreground', border: '' };
+    };
+
     return (
       <div>
         <h2 className="text-xl font-semibold mb-4">Журнал действий</h2>
@@ -443,32 +453,38 @@ export const CategoriesRewardsView = (props: CategoriesRewardsViewProps) => {
               <div key={dayKey}>
                 <h3 className="text-sm font-semibold text-muted-foreground mb-2 px-1">{getDayLabel(dayKey)}</h3>
                 <div className="space-y-2">
-                  {groupedLogs[dayKey].map(log => (
-                    <Card key={log.id} className="p-4 hover:shadow-md transition-all">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-sm mb-1">{log.action}</h3>
-                          <p className="text-sm text-muted-foreground">{log.description}</p>
-                          <p className="text-xs text-muted-foreground/60 mt-1">
-                            {format(new Date(log.timestamp), 'HH:mm', { locale: ru })}
-                          </p>
+                  {groupedLogs[dayKey].map(log => {
+                    const style = getLogStyle(log);
+                    return (
+                      <Card key={log.id} className={`p-4 hover:shadow-md transition-all ${style.border}`}>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-2 flex-1">
+                            <Icon name={style.icon} size={16} className={`mt-0.5 shrink-0 ${style.color}`} />
+                            <div className="flex-1">
+                              <h3 className={`font-semibold text-sm mb-1 ${style.color}`}>{log.action}</h3>
+                              <p className="text-sm text-muted-foreground">{log.description}</p>
+                              <p className="text-xs text-muted-foreground/60 mt-1">
+                                {format(new Date(log.timestamp), 'HH:mm', { locale: ru })}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {log.undoData && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0"
+                                onClick={() => props.handleUndoAction(log.id)}
+                                title="Отменить действие"
+                              >
+                                <Icon name="Undo2" size={14} />
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {log.undoData && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 w-7 p-0"
-                              onClick={() => props.handleUndoAction(log.id)}
-                              title="Отменить действие"
-                            >
-                              <Icon name="Undo2" size={14} />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
             ))}
